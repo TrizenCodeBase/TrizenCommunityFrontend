@@ -1,0 +1,19 @@
+<svg width="400" height="240" viewBox="0 0 400 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="seminarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#1E40AF;stop-opacity:1" />
+<stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+</linearGradient>
+<pattern id="seminarDots" patternUnits="userSpaceOnUse" width="28" height="28">
+<circle cx="14" cy="14" r="1.8" fill="white" opacity="0.1"/>
+</pattern>
+</defs>
+<rect width="400" height="240" fill="url(#seminarGrad)"/>
+<rect width="400" height="240" fill="url(#seminarDots)"/>
+<circle cx="200" cy="120" r="50" fill="white" opacity="0.1"/>
+<rect x="160" y="90" width="80" height="50" rx="10" fill="white" opacity="0.2"/>
+<rect x="170" y="100" width="60" height="30" rx="6" fill="white" opacity="0.3"/>
+<circle cx="200" cy="115" r="12" fill="white" opacity="0.4"/>
+<rect x="190" y="125" width="20" height="8" rx="4" fill="white" opacity="0.3"/>
+<text x="200" y="180" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">SEMINAR</text>
+</svg>
