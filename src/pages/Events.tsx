@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CreateEventModal from "@/components/CreateEventModal";
+import EditEventModal from "@/components/EditEventModal";
 import { eventsService, Event } from "@/services/events";
 
 const Events = () => {
@@ -21,6 +22,8 @@ const Events = () => {
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedDate, setSelectedDate] = useState("All Dates");
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -270,9 +273,25 @@ const Events = () => {
             toast.error("Only administrators can edit events");
             return;
         }
-        // For now, we'll just show a toast. In a real app, you'd open an edit modal
-        toast.info("Edit functionality coming soon!");
-        console.log("Edit event:", event);
+        setSelectedEvent(event);
+        setShowEditModal(true);
+    };
+
+    const handleEventUpdated = async () => {
+        try {
+            setIsLoading(true);
+            // Add a small delay to ensure the backend has processed the update
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await eventsService.getEvents();
+            console.log('Refreshed events after update:', response.events);
+            setEvents(response.events);
+            toast.success("Events list updated!");
+        } catch (error) {
+            console.error('Failed to refresh events:', error);
+            toast.error("Failed to refresh events list");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleDeleteEvent = async (event: Event) => {
@@ -524,6 +543,15 @@ const Events = () => {
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 onEventCreated={handleEventCreated}
+            />
+            <EditEventModal
+                isOpen={showEditModal}
+                onClose={() => {
+                    setShowEditModal(false);
+                    setSelectedEvent(null);
+                }}
+                event={selectedEvent}
+                onEventUpdated={handleEventUpdated}
             />
 
             <Footer />
