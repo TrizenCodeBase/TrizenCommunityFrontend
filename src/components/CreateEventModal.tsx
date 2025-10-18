@@ -97,7 +97,7 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
         title: "",
         description: "",
         shortDescription: "",
-        category: "",
+        category: "Workshop", // Set default category
         type: "Online",
         difficulty: "All Levels",
 
@@ -125,7 +125,7 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
         maxAttendees: 50,
 
         // Event Settings
-        status: "Draft",
+        status: "Published",
         isFeatured: false,
         isPublic: true,
         registrationOpen: true,
@@ -264,22 +264,49 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
             return;
         }
 
-        // Check required fields
-        const requiredFields = {
-            title: formData.title,
-            description: formData.description,
-            category: formData.category,
-            startDate: formData.startDate,
-            endDate: formData.endDate,
-            maxAttendees: formData.maxAttendees
-        };
+        // Check required fields with proper validation
+        const errors: string[] = [];
 
-        const missingFields = Object.entries(requiredFields)
-            .filter(([key, value]) => !value || (typeof value === 'string' && value.trim() === ''))
-            .map(([key]) => key);
+        if (!formData.title || formData.title.trim().length < 5) {
+            errors.push('Title must be at least 5 characters');
+        }
+        if (formData.title && formData.title.trim().length > 100) {
+            errors.push('Title cannot exceed 100 characters');
+        }
 
-        if (missingFields.length > 0) {
-            toast.error(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+        if (!formData.description || formData.description.trim().length < 20) {
+            errors.push('Description must be at least 20 characters');
+        }
+        if (formData.description && formData.description.trim().length > 2000) {
+            errors.push('Description cannot exceed 2000 characters');
+        }
+
+        if (!formData.category) {
+            errors.push('Category is required');
+        }
+
+        if (!formData.type) {
+            errors.push('Event type is required');
+        }
+
+        if (!formData.startDate) {
+            errors.push('Start date is required');
+        }
+
+        if (!formData.endDate) {
+            errors.push('End date is required');
+        }
+
+        if (!formData.maxAttendees || formData.maxAttendees < 1) {
+            errors.push('Maximum attendees must be at least 1');
+        }
+
+        if (formData.price && formData.price < 0) {
+            errors.push('Price cannot be negative');
+        }
+
+        if (errors.length > 0) {
+            toast.error(errors.join(', '));
             return;
         }
 
@@ -300,46 +327,61 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
 
         setIsLoading(true);
         try {
-            // Prepare the data for API submission
+            // Prepare the data for API submission - only send required fields for now
             const eventData = {
                 title: formData.title.trim(),
                 description: formData.description.trim(),
-                shortDescription: formData.shortDescription?.trim() || '',
                 category: formData.category,
                 type: formData.type,
-                difficulty: formData.difficulty,
                 startDate: formData.startDate,
                 endDate: formData.endDate,
-                timezone: formData.timezone,
-                duration: formData.duration,
-                location: formData.location,
                 maxAttendees: formData.maxAttendees,
                 price: formData.price || 0,
-                currency: formData.currency,
-                status: formData.status,
-                isFeatured: formData.isFeatured,
-                isPublic: formData.isPublic,
-                registrationOpen: formData.registrationOpen,
-                requiresApproval: formData.requiresApproval,
-                registrationDeadline: formData.registrationDeadline || null,
-                coverImage: formData.coverImage || '',
-                tags: formData.tags,
-                topics: formData.topics,
-                prerequisites: formData.prerequisites,
-                requirements: formData.requirements,
-                whatYouWillLearn: formData.whatYouWillLearn,
-                targetAudience: formData.targetAudience,
-                speakers: formData.speakers
+                // Add optional fields only if they have values
+                ...(formData.shortDescription && { shortDescription: formData.shortDescription.trim() }),
+                ...(formData.difficulty && { difficulty: formData.difficulty }),
+                ...(formData.timezone && { timezone: formData.timezone }),
+                ...(formData.duration && { duration: formData.duration }),
+                ...(formData.location && Object.keys(formData.location).some(key => formData.location[key]) && { location: formData.location }),
+                ...(formData.currency && { currency: formData.currency }),
+                ...(formData.status && { status: formData.status }),
+                ...(formData.isFeatured !== undefined && { isFeatured: formData.isFeatured }),
+                ...(formData.isPublic !== undefined && { isPublic: formData.isPublic }),
+                ...(formData.registrationOpen !== undefined && { registrationOpen: formData.registrationOpen }),
+                ...(formData.requiresApproval !== undefined && { requiresApproval: formData.requiresApproval }),
+                ...(formData.registrationDeadline && { registrationDeadline: formData.registrationDeadline }),
+                ...(formData.coverImage && { coverImage: formData.coverImage }),
+                ...(formData.tags.length > 0 && { tags: formData.tags }),
+                ...(formData.topics.length > 0 && { topics: formData.topics }),
+                ...(formData.prerequisites.length > 0 && { prerequisites: formData.prerequisites }),
+                ...(formData.requirements.length > 0 && { requirements: formData.requirements }),
+                ...(formData.whatYouWillLearn.length > 0 && { whatYouWillLearn: formData.whatYouWillLearn }),
+                ...(formData.targetAudience.length > 0 && { targetAudience: formData.targetAudience }),
+                ...(formData.speakers.length > 0 && { speakers: formData.speakers })
             };
 
             console.log('Submitting event data:', eventData);
-            await eventsService.createEvent(eventData);
+            const createdEvent = await eventsService.createEvent(eventData);
+            console.log('Event created successfully:', createdEvent);
             toast.success("Event created successfully!");
             onEventCreated?.();
             onClose();
         } catch (error: any) {
             console.error('Create event error:', error);
-            toast.error(error.message || "Failed to create event");
+
+            // Try to extract more detailed error information
+            let errorMessage = "Failed to create event";
+
+            if (error.message) {
+                errorMessage = error.message;
+            }
+
+            // If it's a validation error, show the specific validation issues
+            if (error.message && error.message.includes('Validation failed')) {
+                errorMessage = "Please check all required fields and try again";
+            }
+
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
