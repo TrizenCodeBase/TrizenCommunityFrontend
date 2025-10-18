@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2, MoreVertical, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -163,6 +164,36 @@ const Events = () => {
         }
     };
 
+    const handleEditEvent = (event: Event) => {
+        if (!isAdmin) {
+            toast.error("Only administrators can edit events");
+            return;
+        }
+        // For now, we'll just show a toast. In a real app, you'd open an edit modal
+        toast.info("Edit functionality coming soon!");
+        console.log("Edit event:", event);
+    };
+
+    const handleDeleteEvent = async (event: Event) => {
+        if (!isAdmin) {
+            toast.error("Only administrators can delete events");
+            return;
+        }
+
+        if (window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`)) {
+            try {
+                await eventsService.deleteEvent(event._id);
+                toast.success("Event deleted successfully!");
+                // Refresh events list
+                const response = await eventsService.getEvents();
+                setEvents(response.events);
+            } catch (error: any) {
+                console.error('Delete event error:', error);
+                toast.error(error.message || "Failed to delete event");
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50">
             <Navbar />
@@ -233,7 +264,13 @@ const Events = () => {
                         {/* Create Event Button - Admin Only */}
                         {isAdmin && (
                             <Button
-                                onClick={() => setShowCreateModal(true)}
+                                onClick={() => {
+                                    if (!isAdmin) {
+                                        toast.error("Only administrators can create events");
+                                        return;
+                                    }
+                                    setShowCreateModal(true);
+                                }}
                                 className="h-12 px-6 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white shadow-lg shadow-primary/25"
                             >
                                 <Plus className="w-5 h-5 mr-2" />
@@ -291,6 +328,37 @@ const Events = () => {
                                         {event.category}
                                     </Badge>
                                 </div>
+
+                                {/* Admin Actions Menu */}
+                                {isAdmin && (
+                                    <div className="absolute top-3 right-3">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 bg-white/90 backdrop-blur-sm hover:bg-white/95 shadow-md"
+                                                >
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleEditEvent(event)}>
+                                                    <Edit className="w-4 h-4 mr-2" />
+                                                    Edit Event
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    onClick={() => handleDeleteEvent(event)}
+                                                    className="text-red-600 focus:text-red-600"
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Delete Event
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                )}
                             </div>
 
                             <CardContent className="p-6">
