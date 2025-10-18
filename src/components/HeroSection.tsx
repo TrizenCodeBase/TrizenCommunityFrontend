@@ -79,15 +79,17 @@ const HeroSection = () => {
                       <User className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
-                  <Link to="/events">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="bg-transparent border-2 border-white/80 text-white hover:border-white hover:bg-transparent font-semibold px-12 py-4 rounded-xl shadow-xl hover:shadow-white/20 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-105"
-                    >
-                      Explore Events
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      const eventsSection = document.getElementById('events');
+                      eventsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className="bg-transparent border-2 border-white/80 text-white hover:border-white hover:bg-transparent font-semibold px-12 py-4 rounded-xl shadow-xl hover:shadow-white/20 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:scale-105"
+                  >
+                    Explore Events
+                  </Button>
                 </>
               ) : (
                 <>
