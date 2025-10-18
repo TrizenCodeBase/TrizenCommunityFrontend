@@ -43,7 +43,7 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-1">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
-                
+
                 if (link.isPlaceholder) {
                   return (
                     <button
@@ -56,7 +56,7 @@ const Navbar = () => {
                     </button>
                   );
                 }
-                
+
                 return (
                   <Link
                     key={link.name}
@@ -157,7 +157,7 @@ const Navbar = () => {
             <div className="md:hidden py-6 space-y-2 animate-slide-up border-t border-gray-200/50 mt-2">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
-                
+
                 if (link.isPlaceholder) {
                   return (
                     <button
@@ -173,7 +173,7 @@ const Navbar = () => {
                     </button>
                   );
                 }
-                
+
                 return (
                   <Link
                     key={link.name}

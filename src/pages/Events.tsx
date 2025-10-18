@@ -10,10 +10,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CreateEventModal from "@/components/CreateEventModal";
 import { eventsService, Event } from "@/services/events";
 
 const Events = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
@@ -21,6 +22,9 @@ const Events = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Check if user is admin
+    const isAdmin = user?.isAdmin || false;
 
     // Load events from API
     useEffect(() => {
@@ -146,6 +150,19 @@ const Events = () => {
         return matchesSearch && matchesCategory;
     });
 
+    const handleEventCreated = async () => {
+        // Refresh events list after creating a new event
+        try {
+            setIsLoading(true);
+            const response = await eventsService.getEvents();
+            setEvents(response.events);
+        } catch (error) {
+            console.error('Failed to refresh events:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50">
             <Navbar />
@@ -213,14 +230,16 @@ const Events = () => {
                             </SelectContent>
                         </Select>
 
-                        {/* Create Event Button */}
-                        <Button
-                            onClick={() => setShowCreateModal(true)}
-                            className="h-12 px-6 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white shadow-lg shadow-primary/25"
-                        >
-                            <Plus className="w-5 h-5 mr-2" />
-                            Create Event
-                        </Button>
+                        {/* Create Event Button - Admin Only */}
+                        {isAdmin && (
+                            <Button
+                                onClick={() => setShowCreateModal(true)}
+                                className="h-12 px-6 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white shadow-lg shadow-primary/25"
+                            >
+                                <Plus className="w-5 h-5 mr-2" />
+                                Create Event
+                            </Button>
+                        )}
                     </div>
 
                     {/* Quick Filters */}
@@ -331,6 +350,12 @@ const Events = () => {
                 </div>
             </div>
 
+            {/* Create Event Modal */}
+            <CreateEventModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onEventCreated={handleEventCreated}
+            />
 
             <Footer />
         </div>
