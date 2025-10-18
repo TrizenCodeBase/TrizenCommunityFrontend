@@ -15,7 +15,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Events", href: "/events", icon: Calendar },
-    { name: "Resources", href: "/resources", icon: FileText },
+    { name: "Resources", href: null, icon: FileText, isPlaceholder: true },
     { name: "About", href: "/about", icon: Info },
     { name: "Contact", href: "/contact", icon: Mail },
   ];
@@ -43,6 +43,20 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-1">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
+                
+                if (link.isPlaceholder) {
+                  return (
+                    <button
+                      key={link.name}
+                      onClick={() => alert('Resources section coming soon!')}
+                      className="px-4 py-2 rounded-lg transition-all duration-200 font-medium text-sm text-gray-400 hover:text-gray-500 hover:bg-gray-50 cursor-not-allowed"
+                      title="Coming Soon"
+                    >
+                      {link.name}
+                    </button>
+                  );
+                }
+                
                 return (
                   <Link
                     key={link.name}
@@ -143,6 +157,23 @@ const Navbar = () => {
             <div className="md:hidden py-6 space-y-2 animate-slide-up border-t border-gray-200/50 mt-2">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
+                
+                if (link.isPlaceholder) {
+                  return (
+                    <button
+                      key={link.name}
+                      onClick={() => {
+                        alert('Resources section coming soon!');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="px-4 py-3 rounded-lg transition-all duration-200 font-medium text-gray-400 hover:text-gray-500 hover:bg-gray-50 cursor-not-allowed w-full text-left"
+                      title="Coming Soon"
+                    >
+                      {link.name}
+                    </button>
+                  );
+                }
+                
                 return (
                   <Link
                     key={link.name}
