@@ -1,4 +1,4 @@
-import { ArrowRight, Mail, Users, Sparkles, Globe, Star, User } from "lucide-react";
+import { ArrowRight, Mail, Users, Sparkles, Globe, Star, User, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -10,10 +10,10 @@ const CTASection = () => {
   const { isAuthenticated, user } = useAuth();
 
   const socialLinks = [
-    { name: "LinkedIn", icon: Users, href: "#linkedin" },
-    { name: "Twitter", icon: Sparkles, href: "#twitter" },
-    { name: "Discord", icon: Globe, href: "#discord" },
-    { name: "GitHub", icon: Star, href: "#github" }
+    { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/trizenventures/" },
+    { name: "Twitter", icon: Twitter, href: "https://x.com/TrizenVenture" },
+    { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/trizenventuresllp/" },
+    { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/trizenventures/" }
   ];
 
   const handleSubscribe = (e: React.FormEvent) => {
