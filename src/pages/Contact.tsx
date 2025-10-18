@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Phone, MapPin, Send, User, Building, MessageSquare, CheckCircle, Clock, Globe, Linkedin, Twitter, Facebook, Instagram } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Send, User, Building, MessageSquare, CheckCircle, Clock, Globe, Linkedin, Facebook, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+
+// Custom X (Twitter) icon component
+const XIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -84,7 +95,7 @@ const Contact = () => {
 
     const socialLinks = [
         { name: "Facebook", icon: Facebook, link: "https://www.facebook.com/trizenventures/", color: "hover:bg-blue-700" },
-        { name: "Twitter", icon: Twitter, link: "https://x.com/TrizenVenture", color: "hover:bg-sky-500" },
+        { name: "X", icon: XIcon, link: "https://x.com/TrizenVenture", color: "hover:bg-sky-500" },
         { name: "LinkedIn", icon: Linkedin, link: "https://www.linkedin.com/company/trizenventuresllp/", color: "hover:bg-blue-600" },
         { name: "Instagram", icon: Instagram, link: "https://www.instagram.com/trizenventures/", color: "hover:bg-pink-600" }
     ];

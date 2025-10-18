@@ -1,5 +1,16 @@
-import { MessageSquare, Calendar, LayoutDashboard, Info, Mail, Heart, ArrowRight, Linkedin, Twitter, Facebook, Instagram, Globe, Users, Star } from "lucide-react";
+import { MessageSquare, Calendar, LayoutDashboard, Info, Mail, Heart, ArrowRight, Linkedin, Facebook, Instagram, Globe, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Custom X (Twitter) icon component
+const XIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
 
 const Footer = () => {
   const quickLinks = [
@@ -14,7 +25,7 @@ const Footer = () => {
 
   const socialLinks = [
     { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/trizenventures/" },
-    { name: "Twitter", icon: Twitter, href: "https://x.com/TrizenVenture" },
+    { name: "X", icon: XIcon, href: "https://x.com/TrizenVenture" },
     { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/trizenventuresllp/" },
     { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/trizenventures/" }
   ];
