@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Phone, MapPin, Send, User, Building, MessageSquare, CheckCircle, Clock, Globe, Linkedin, Twitter, Github, Facebook } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Send, User, Building, MessageSquare, CheckCircle, Clock, Globe, Linkedin, Twitter, Facebook, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,16 +62,16 @@ const Contact = () => {
         {
             icon: Mail,
             title: "Email",
-            value: "hello@trizen.com",
-            link: "mailto:hello@trizen.com",
+            value: "support@trizenventures.com",
+            link: "mailto:support@trizenventures.com",
             availability: "Response within 24 hours"
         },
         {
             icon: Phone,
             title: "Phone",
-            value: "+1 (555) 123-4567",
-            link: "tel:+15551234567",
-            availability: "Mon-Fri, 9 AM - 6 PM PST"
+            value: "+918639648822",
+            link: "tel:+918639648822",
+            availability: "Mon-Fri, 9 AM - 6 PM IST"
         },
         {
             icon: MapPin,
@@ -83,10 +83,10 @@ const Contact = () => {
     ];
 
     const socialLinks = [
-        { name: "LinkedIn", icon: Linkedin, link: "#", color: "hover:bg-blue-600" },
-        { name: "Twitter", icon: Twitter, link: "#", color: "hover:bg-sky-500" },
-        { name: "GitHub", icon: Github, link: "#", color: "hover:bg-gray-800" },
-        { name: "Facebook", icon: Facebook, link: "#", color: "hover:bg-blue-700" }
+        { name: "Facebook", icon: Facebook, link: "https://www.facebook.com/trizenventures/", color: "hover:bg-blue-700" },
+        { name: "Twitter", icon: Twitter, link: "https://x.com/TrizenVenture", color: "hover:bg-sky-500" },
+        { name: "LinkedIn", icon: Linkedin, link: "https://www.linkedin.com/company/trizenventuresllp/", color: "hover:bg-blue-600" },
+        { name: "Instagram", icon: Instagram, link: "https://www.instagram.com/trizenventures/", color: "hover:bg-pink-600" }
     ];
 
     return (

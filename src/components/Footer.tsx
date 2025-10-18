@@ -1,4 +1,4 @@
-import { MessageSquare, Calendar, LayoutDashboard, Info, Mail, Heart, ArrowRight, Linkedin, Twitter, Github, Globe, Users, Star } from "lucide-react";
+import { MessageSquare, Calendar, LayoutDashboard, Info, Mail, Heart, ArrowRight, Linkedin, Twitter, Facebook, Instagram, Globe, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Footer = () => {
@@ -13,11 +13,10 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { name: "Twitter", icon: Twitter, href: "#twitter" },
-    { name: "Facebook", icon: Globe, href: "#facebook" },
-    { name: "Instagram", icon: Users, href: "#instagram" },
-    { name: "LinkedIn", icon: Linkedin, href: "#linkedin" },
-    { name: "YouTube", icon: Star, href: "#youtube" }
+    { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/trizenventures/" },
+    { name: "Twitter", icon: Twitter, href: "https://x.com/TrizenVenture" },
+    { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/trizenventuresllp/" },
+    { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/trizenventures/" }
   ];
 
   return (
