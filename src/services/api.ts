@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.MODE === 'production'
-    ? 'https://your-backend-url.vercel.app/api'
-    : 'http://localhost:5000/api';
+    ? 'https://trizencommunitybackend.llp.trizenventures.com/api'
+    : 'https://trizencommunitybackend.llp.trizenventures.com/api';
 
 interface ApiResponse<T = any> {
     success: boolean;
