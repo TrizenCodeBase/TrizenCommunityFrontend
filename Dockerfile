@@ -25,16 +25,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nginx
-RUN adduser -S nginx -u 1001
-
-# Change ownership of nginx directories
-RUN chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx /usr/share/nginx/html
-RUN chown -R nginx:nginx /etc/nginx/conf.d
-
-# Switch to non-root user
-USER nginx
+# nginx:alpine already runs as non-root user, no need to create additional users
 
 # Expose port
 EXPOSE 80
