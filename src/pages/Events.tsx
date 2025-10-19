@@ -1,26 +1,34 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2, MoreVertical, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CreateEventModal from "@/components/CreateEventModal";
+import EditEventModal from "@/components/EditEventModal";
 import { eventsService, Event } from "@/services/events";
 
 const Events = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [selectedDate, setSelectedDate] = useState("All Dates");
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Check if user is admin
+    const isAdmin = user?.isAdmin || false;
 
     // Load events from API
     useEffect(() => {
@@ -28,65 +36,161 @@ const Events = () => {
             try {
                 setIsLoading(true);
                 const response = await eventsService.getEvents();
+                // If no events from API, use fallback events
+                if (!response.events || response.events.length === 0) {
+                    throw new Error('No events from API');
+                }
                 setEvents(response.events);
             } catch (error) {
                 console.error('Failed to load events:', error);
                 // Fallback to mock data if API fails
                 const mockEvents = [
                     {
-                        id: 1,
+                        _id: "507f1f77bcf86cd799439011",
                         title: "AI & Machine Learning Workshop",
-                        category: "Research",
-                        date: "March 25, 2025",
-                        time: "2:00 PM - 5:00 PM",
-                        location: "Virtual Event",
+                        description: "Learn the latest in AI and ML technologies",
+                        startDate: "2025-03-25T14:00:00Z",
+                        endDate: "2025-03-25T17:00:00Z",
+                        location: {
+                            venue: "Virtual Event",
+                            onlineLink: "https://zoom.us/j/123456789"
+                        },
+                        category: "Workshop",
+                        type: "Online",
+                        difficulty: "Beginner",
+                        timezone: "UTC",
+                        duration: 180,
+                        organizer: {
+                            _id: "1",
+                            name: "Tech Academy"
+                        },
+                        coverImage: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop",
+                        currentAttendees: 0,
+                        maxAttendees: 100,
+                        price: 0,
+                        currency: "USD",
+                        isFeatured: false,
+                        isPublic: true,
+                        registrationOpen: true,
+                        requiresApproval: false,
+                        tags: ["AI", "Machine Learning", "Workshop"],
+                        topics: ["Machine Learning", "AI", "Data Science"],
+                        prerequisites: ["Basic programming knowledge"],
+                        requirements: ["Laptop", "Internet connection"],
+                        whatYouWillLearn: ["AI fundamentals", "ML algorithms", "Practical applications"],
+                        targetAudience: ["Developers", "Students", "Tech enthusiasts"],
+                        speakers: [],
+                        likes: [],
+                        bookmarks: [],
+                        shares: 0,
+                        views: 0,
+                        reviews: [],
+                        averageRating: 0,
+                        totalReviews: 0,
+                        analytics: { registrations: [], attendance: { registered: 0, attended: 0, noShow: 0 }, engagement: { pageViews: 0, uniqueVisitors: 0, timeOnPage: 0 } },
+                        status: "Published",
+                        createdAt: "2025-01-01T00:00:00Z",
+                        updatedAt: "2025-01-01T00:00:00Z"
+                    },
+                    {
+                        _id: "507f1f77bcf86cd799439012",
+                        title: "Research Symposium 2025",
+                        description: "Present your research and network with peers",
+                        startDate: "2025-04-10T09:00:00Z",
+                        endDate: "2025-04-10T18:00:00Z",
+                        location: {
+                            venue: "Innovation Hub",
+                            address: "123 Tech Street",
+                            city: "New York",
+                            state: "NY",
+                            country: "USA"
+                        },
+                        category: "Conference",
+                        type: "In-Person",
+                        difficulty: "Advanced",
+                        timezone: "UTC",
+                        duration: 540,
+                        organizer: {
+                            _id: "2",
+                            name: "Research Institute"
+                        },
+                        coverImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
+                        currentAttendees: 0,
+                        maxAttendees: 200,
+                        price: 0,
+                        currency: "USD",
+                        isFeatured: false,
+                        isPublic: true,
+                        registrationOpen: true,
+                        requiresApproval: false,
+                        tags: ["Research", "Conference", "Networking"],
+                        topics: ["Research", "Academic", "Innovation"],
+                        prerequisites: ["Research background"],
+                        requirements: ["Presentation materials"],
+                        whatYouWillLearn: ["Research methodologies", "Academic networking", "Publication strategies"],
+                        targetAudience: ["Researchers", "Academics", "PhD students"],
+                        speakers: [],
+                        likes: [],
+                        bookmarks: [],
+                        shares: 0,
+                        views: 0,
+                        reviews: [],
+                        averageRating: 0,
+                        totalReviews: 0,
+                        analytics: { registrations: [], attendance: { registered: 0, attended: 0, noShow: 0 }, engagement: { pageViews: 0, uniqueVisitors: 0, timeOnPage: 0 } },
+                        status: "Published",
+                        createdAt: "2025-01-01T00:00:00Z",
+                        updatedAt: "2025-01-01T00:00:00Z"
+                    },
+                    {
+                        _id: "507f1f77bcf86cd799439013",
+                        title: "Startup Pitch Competition",
+                        description: "Pitch your startup idea to investors",
+                        startDate: "2025-04-20T15:00:00Z",
+                        endDate: "2025-04-20T20:00:00Z",
+                        location: {
+                            venue: "Tech Center",
+                            address: "456 Startup Ave",
+                            city: "San Francisco",
+                            state: "CA",
+                            country: "USA"
+                        },
+                        category: "Meetup",
+                        type: "In-Person",
                         difficulty: "Intermediate",
-                        description: "Learn advanced AI techniques and machine learning algorithms with hands-on projects and expert guidance from industry leaders.",
-                        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"
-                    },
-                    {
-                        id: 2,
-                        title: "Blockchain Development Bootcamp",
-                        category: "Training",
-                        date: "April 15, 2025",
-                        time: "9:00 AM - 6:00 PM",
-                        location: "Tech Center, SF",
-                        difficulty: "Advanced",
-                        description: "Comprehensive bootcamp covering blockchain fundamentals, smart contracts, and decentralized applications development.",
-                        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop"
-                    },
-                    {
-                        id: 3,
-                        title: "Cloud Architecture Webinar",
-                        category: "Webinars",
-                        date: "June 25, 2025",
-                        time: "3:00 PM - 4:30 PM",
-                        location: "Online",
-                        difficulty: "All Levels",
-                        description: "Explore modern cloud architecture patterns and best practices for scalable applications.",
-                        image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop"
-                    },
-                    {
-                        id: 4,
-                        title: "Innovation Meetup",
-                        category: "Meetups",
-                        date: "June 28, 2025",
-                        time: "6:00 PM - 8:00 PM",
-                        location: "Tech Hub",
-                        difficulty: "All Levels",
-                        description: "Network with innovators and discuss the latest trends in technology and entrepreneurship.",
-                        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=400&fit=crop"
-                    },
-                    {
-                        id: 5,
-                        title: "Data Science Conference",
-                        category: "Conferences",
-                        date: "July 10, 2025",
-                        time: "9:00 AM - 5:00 PM",
-                        location: "Convention Center",
-                        difficulty: "Advanced",
-                        description: "Join leading data scientists and researchers for insights into the future of data science.",
-                        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop"
+                        timezone: "UTC",
+                        duration: 300,
+                        organizer: {
+                            _id: "3",
+                            name: "Startup Hub"
+                        },
+                        coverImage: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop",
+                        currentAttendees: 0,
+                        maxAttendees: 50,
+                        price: 0,
+                        currency: "USD",
+                        isFeatured: false,
+                        isPublic: true,
+                        registrationOpen: true,
+                        requiresApproval: false,
+                        tags: ["Startup", "Pitch", "Competition"],
+                        topics: ["Entrepreneurship", "Pitching", "Investment"],
+                        prerequisites: ["Startup idea"],
+                        requirements: ["Pitch deck", "Business plan"],
+                        whatYouWillLearn: ["Pitch techniques", "Investor relations", "Business development"],
+                        targetAudience: ["Entrepreneurs", "Startup founders", "Business students"],
+                        speakers: [],
+                        likes: [],
+                        bookmarks: [],
+                        shares: 0,
+                        views: 0,
+                        reviews: [],
+                        averageRating: 0,
+                        totalReviews: 0,
+                        analytics: { registrations: [], attendance: { registered: 0, attended: 0, noShow: 0 }, engagement: { pageViews: 0, uniqueVisitors: 0, timeOnPage: 0 } },
+                        status: "Published",
+                        createdAt: "2025-01-01T00:00:00Z",
+                        updatedAt: "2025-01-01T00:00:00Z"
                     }] as Event[];
                 setEvents(mockEvents);
             } finally {
@@ -145,6 +249,70 @@ const Events = () => {
         const matchesCategory = selectedCategory === "All Categories" || event.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
+
+    const handleEventCreated = async () => {
+        // Refresh events list after creating a new event
+        try {
+            setIsLoading(true);
+            // Add a small delay to ensure the backend has processed the new event
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await eventsService.getEvents();
+            console.log('Refreshed events:', response.events);
+            setEvents(response.events);
+            toast.success("Events list updated!");
+        } catch (error) {
+            console.error('Failed to refresh events:', error);
+            toast.error("Failed to refresh events list");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleEditEvent = (event: Event) => {
+        if (!isAdmin) {
+            toast.error("Only administrators can edit events");
+            return;
+        }
+        setSelectedEvent(event);
+        setShowEditModal(true);
+    };
+
+    const handleEventUpdated = async () => {
+        try {
+            setIsLoading(true);
+            // Add a small delay to ensure the backend has processed the update
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await eventsService.getEvents();
+            console.log('Refreshed events after update:', response.events);
+            setEvents(response.events);
+            toast.success("Events list updated!");
+        } catch (error) {
+            console.error('Failed to refresh events:', error);
+            toast.error("Failed to refresh events list");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteEvent = async (event: Event) => {
+        if (!isAdmin) {
+            toast.error("Only administrators can delete events");
+            return;
+        }
+
+        if (window.confirm(`Are you sure you want to delete "${event.title}"? This action cannot be undone.`)) {
+            try {
+                await eventsService.deleteEvent(event._id);
+                toast.success("Event deleted successfully!");
+                // Refresh events list
+                const response = await eventsService.getEvents();
+                setEvents(response.events);
+            } catch (error: any) {
+                console.error('Delete event error:', error);
+                toast.error(error.message || "Failed to delete event");
+            }
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50">
@@ -213,14 +381,22 @@ const Events = () => {
                             </SelectContent>
                         </Select>
 
-                        {/* Create Event Button */}
-                        <Button
-                            onClick={() => setShowCreateModal(true)}
-                            className="h-12 px-6 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white shadow-lg shadow-primary/25"
-                        >
-                            <Plus className="w-5 h-5 mr-2" />
-                            Create Event
-                        </Button>
+                        {/* Create Event Button - Admin Only */}
+                        {isAdmin && (
+                            <Button
+                                onClick={() => {
+                                    if (!isAdmin) {
+                                        toast.error("Only administrators can create events");
+                                        return;
+                                    }
+                                    setShowCreateModal(true);
+                                }}
+                                className="h-12 px-6 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white shadow-lg shadow-primary/25"
+                            >
+                                <Plus className="w-5 h-5 mr-2" />
+                                Create Event
+                            </Button>
+                        )}
                     </div>
 
                     {/* Quick Filters */}
@@ -272,6 +448,37 @@ const Events = () => {
                                         {event.category}
                                     </Badge>
                                 </div>
+
+                                {/* Admin Actions Menu */}
+                                {isAdmin && (
+                                    <div className="absolute top-3 right-3">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 bg-white/90 backdrop-blur-sm hover:bg-white/95 shadow-md"
+                                                >
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleEditEvent(event)}>
+                                                    <Edit className="w-4 h-4 mr-2" />
+                                                    Edit Event
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    onClick={() => handleDeleteEvent(event)}
+                                                    className="text-red-600 focus:text-red-600"
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Delete Event
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                )}
                             </div>
 
                             <CardContent className="p-6">
@@ -331,6 +538,21 @@ const Events = () => {
                 </div>
             </div>
 
+            {/* Create Event Modal */}
+            <CreateEventModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onEventCreated={handleEventCreated}
+            />
+            <EditEventModal
+                isOpen={showEditModal}
+                onClose={() => {
+                    setShowEditModal(false);
+                    setSelectedEvent(null);
+                }}
+                event={selectedEvent}
+                onEventUpdated={handleEventUpdated}
+            />
 
             <Footer />
         </div>

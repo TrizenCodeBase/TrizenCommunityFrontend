@@ -18,13 +18,17 @@ const EventsSection = () => {
       try {
         setIsLoading(true);
         const response = await eventsService.getEvents({ limit: 3 });
-        setEvents(response.events || []);
+        // If no events from API, use fallback events
+        if (!response.events || response.events.length === 0) {
+          throw new Error('No events from API');
+        }
+        setEvents(response.events);
       } catch (error) {
         console.error('Error loading events:', error);
         // Fallback to demo events if API fails
         setEvents([
           {
-            _id: "1",
+            _id: "507f1f77bcf86cd799439011",
             title: "AI & Machine Learning Workshop",
             description: "Learn the latest in AI and ML technologies",
             startDate: "2025-03-25T14:00:00Z",
@@ -56,12 +60,13 @@ const EventsSection = () => {
             prerequisites: ["Basic programming knowledge"],
             requirements: ["Laptop", "Internet connection"],
             whatYouWillLearn: ["AI fundamentals", "ML algorithms", "Practical applications"],
+            targetAudience: ["Developers", "Students", "Tech enthusiasts"],
             status: "Published",
             createdAt: "2025-01-01T00:00:00Z",
             updatedAt: "2025-01-01T00:00:00Z"
           },
           {
-            _id: "2",
+            _id: "507f1f77bcf86cd799439012",
             title: "Research Symposium 2025",
             description: "Present your research and network with peers",
             startDate: "2025-04-10T09:00:00Z",
@@ -96,12 +101,13 @@ const EventsSection = () => {
             prerequisites: ["Research background"],
             requirements: ["Presentation materials"],
             whatYouWillLearn: ["Research methodologies", "Academic networking", "Publication strategies"],
+            targetAudience: ["Researchers", "Academics", "PhD students"],
             status: "Published",
             createdAt: "2025-01-01T00:00:00Z",
             updatedAt: "2025-01-01T00:00:00Z"
           },
           {
-            _id: "3",
+            _id: "507f1f77bcf86cd799439013",
             title: "Startup Pitch Competition",
             description: "Pitch your startup idea to investors",
             startDate: "2025-04-20T15:00:00Z",
@@ -136,6 +142,7 @@ const EventsSection = () => {
             prerequisites: ["Startup idea"],
             requirements: ["Pitch deck", "Business plan"],
             whatYouWillLearn: ["Pitch techniques", "Investor relations", "Business development"],
+            targetAudience: ["Entrepreneurs", "Startup founders", "Business students"],
             status: "Published",
             createdAt: "2025-01-01T00:00:00Z",
             updatedAt: "2025-01-01T00:00:00Z"
