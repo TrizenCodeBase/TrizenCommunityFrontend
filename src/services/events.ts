@@ -40,11 +40,13 @@ export interface Event {
     }>;
     speakers?: Array<{
         name: string;
-        title: string;
-        company: string;
-        bio: string;
-        avatar: string;
-        socialLinks: {
+        title?: string;
+        company?: string;
+        bio?: string;
+        avatar?: string;
+        image?: string; // base64 or URL
+        profilePicture?: string; // legacy field / URL
+        socialLinks?: {
             linkedin?: string;
             twitter?: string;
             website?: string;

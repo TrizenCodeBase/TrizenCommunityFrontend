@@ -232,7 +232,9 @@ const EventDetails = () => {
                                 <CardContent>
                                     <div className="grid md:grid-cols-2 gap-6">
                                         {event.speakers.map((speaker, index) => {
-                                            const speakerImage = speaker.image || speaker.profilePicture || speaker.avatar;
+                                            type SpeakerWithImages = typeof speaker & { image?: string; profilePicture?: string; avatar?: string };
+                                            const sp = speaker as SpeakerWithImages;
+                                            const speakerImage = sp.image || sp.profilePicture || sp.avatar;
                                             return (
                                                 <div key={index} className="flex items-start gap-5 p-6 bg-white rounded-2xl border border-gray-200 hover:shadow-lg transition-shadow">
                                                     <Avatar className="w-20 h-20 ring-4 ring-blue-50 shadow">
