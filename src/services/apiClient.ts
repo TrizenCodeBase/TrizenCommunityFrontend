@@ -1,5 +1,5 @@
 // API Client for making HTTP requests
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://trizencommunitybackend.llp.trizenventures.com/api';
 
 interface ApiResponse<T = any> {
     success: boolean;
