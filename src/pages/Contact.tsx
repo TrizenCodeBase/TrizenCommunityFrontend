@@ -49,11 +49,30 @@ const Contact = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Simulate form submission
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            const response = await fetch('http://localhost:5000/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
 
-        setIsSubmitting(false);
-        setIsSubmitted(true);
+            const result = await response.json();
+
+            if (result.success) {
+                setIsSubmitted(true);
+                console.log('✅ Contact form submitted successfully:', result);
+            } else {
+                console.error('❌ Contact form submission failed:', result.message);
+                alert('Failed to send message. Please try again later.');
+            }
+        } catch (error) {
+            console.error('❌ Network error:', error);
+            alert('Network error. Please check your connection and try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
 
         // Reset form after 3 seconds
         setTimeout(() => {

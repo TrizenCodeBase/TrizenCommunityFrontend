@@ -13,6 +13,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CreateEventModal from "@/components/CreateEventModal";
 import EditEventModal from "@/components/EditEventModal";
+import ViewEventDetailsModal from "@/components/ViewEventDetailsModal";
+import SpeakerApplicationForm from "@/components/SpeakerApplicationForm";
 import { eventsService, Event } from "@/services/events";
 
 const Events = () => {
@@ -23,7 +25,9 @@ const Events = () => {
     const [selectedDate, setSelectedDate] = useState("All Dates");
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+    const [showSpeakerForm, setShowSpeakerForm] = useState(false);
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -277,6 +281,11 @@ const Events = () => {
         setShowEditModal(true);
     };
 
+    const handleViewEvent = (event: Event) => {
+        setSelectedEvent(event);
+        setShowViewModal(true);
+    };
+
     const handleEventUpdated = async () => {
         try {
             setIsLoading(true);
@@ -518,8 +527,12 @@ const Events = () => {
                                     >
                                         Register
                                     </Button>
-                                    <Button variant="outline" size="icon" className="border-gray-300 hover:border-primary hover:text-primary">
-                                        <Eye className="w-4 h-4" />
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => handleViewEvent(event)}
+                                        className="border-gray-300 hover:border-primary hover:text-primary"
+                                    >
+                                        View Details
                                     </Button>
                                     <Button variant="outline" size="icon" className="border-gray-300 hover:border-primary hover:text-primary">
                                         <Share2 className="w-4 h-4" />
@@ -553,6 +566,117 @@ const Events = () => {
                 event={selectedEvent}
                 onEventUpdated={handleEventUpdated}
             />
+            <ViewEventDetailsModal
+                isOpen={showViewModal}
+                onClose={() => {
+                    setShowViewModal(false);
+                    setSelectedEvent(null);
+                }}
+                event={selectedEvent}
+            />
+
+            {/* Speaker Section */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Become a <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">Speaker</span>
+                    </h2>
+                    <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                        Share your expertise with our community. Apply to speak at our events and inspire others with your knowledge and experience.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    {/* Speaker Benefits */}
+                    <div className="space-y-6">
+                        <h3 className="text-2xl font-semibold text-gray-900 mb-4">Why Speak With Us?</h3>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span className="text-primary font-bold text-sm">1</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900">Reach a Targeted Audience</h4>
+                                    <p className="text-gray-600">Connect with professionals and enthusiasts in your field</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span className="text-primary font-bold text-sm">2</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900">Build Your Network</h4>
+                                    <p className="text-gray-600">Expand your professional network and create valuable connections</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span className="text-primary font-bold text-sm">3</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900">Share Your Expertise</h4>
+                                    <p className="text-gray-600">Inspire others and establish yourself as a thought leader</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                    <span className="text-primary font-bold text-sm">4</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-gray-900">Professional Development</h4>
+                                    <p className="text-gray-600">Enhance your speaking skills and public speaking experience</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-primary/5 to-primary-light/5 rounded-xl p-6 border border-primary/10">
+                            <h4 className="font-semibold text-gray-900 mb-2">What We're Looking For</h4>
+                            <ul className="text-sm text-gray-600 space-y-1">
+                                <li>• Industry expertise and knowledge</li>
+                                <li>• Clear communication skills</li>
+                                <li>• Engaging presentation style</li>
+                                <li>• Relevant experience in your field</li>
+                                <li>• Passion for sharing knowledge</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Speaker Application Form */}
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6">
+                        <div className="text-center mb-6">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Apply to Speak</h3>
+                            <p className="text-gray-600">Fill out the form below to submit your speaker application</p>
+                        </div>
+
+                        {!showSpeakerForm ? (
+                            <div className="text-center">
+                                <Button
+                                    onClick={() => setShowSpeakerForm(true)}
+                                    className="w-full h-12 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white"
+                                >
+                                    Start Your Application
+                                </Button>
+                                <p className="text-sm text-gray-500 mt-3">
+                                    Application takes about 5-10 minutes to complete
+                                </p>
+                            </div>
+                        ) : (
+                            <div>
+                                <SpeakerApplicationForm />
+                                <div className="mt-4 text-center">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowSpeakerForm(false)}
+                                        className="w-full"
+                                    >
+                                        Cancel Application
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
 
             <Footer />
         </div>

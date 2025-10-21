@@ -14,13 +14,11 @@ const XIcon = ({ className }: { className?: string }) => (
 
 const Footer = () => {
   const quickLinks = [
-    { name: "MVP", href: "#mvp" },
-    { name: "Find a chapter", href: "#find-chapter" },
-    { name: "Start A Chapter", href: "#start-chapter" },
-    { name: "Privacy Policy", href: "#privacy" },
-    { name: "Terms & Conditions", href: "#terms" },
-    { name: "Contact Us", href: "#contact" },
-    { name: "Code of Conduct", href: "#code-of-conduct" }
+    { name: "Courses", href: "https://courses.trizenventures.com/" },
+    { name: "Courses Instructor Portal", href: "https://instructor.courses.trizenventures.com/" },
+    { name: "Blogs", href: "https://blogs.trizenventures.com/" },
+    { name: "Community", href: "https://community.trizenventures.com/" },
+    { name: "Academy", href: "https://academy.trizenventures.com/" }
   ];
 
   const socialLinks = [
@@ -58,6 +56,8 @@ const Footer = () => {
                 <li key={link.name}>
                   <a
                     href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-gray-300 hover:text-white transition-colors duration-200 text-sm flex items-center"
                   >
                     <span className="mr-2">›</span>

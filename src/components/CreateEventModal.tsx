@@ -201,7 +201,7 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
                 title: "",
                 company: "",
                 bio: "",
-                avatar: "",
+                image: "",
                 socialLinks: {
                     linkedin: "",
                     twitter: "",
@@ -246,6 +246,26 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleSpeakerImageUpload = (event: React.ChangeEvent<HTMLInputElement>, speakerIndex: number) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                updateSpeaker(speakerIndex, "image", result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const getDisplayImageUrl = (imageUrl: string) => {
+        if (!imageUrl) return '';
+        if (imageUrl.startsWith('data:image/')) {
+            return `📷 Uploaded Image (${Math.round(imageUrl.length / 1024)}KB)`;
+        }
+        return imageUrl;
     };
 
     const handleImageUrlChange = (url: string) => {
@@ -1011,12 +1031,64 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label>Avatar URL</Label>
-                                                        <Input
-                                                            value={speaker.avatar}
-                                                            onChange={(e) => updateSpeaker(index, "avatar", e.target.value)}
-                                                            placeholder="https://example.com/avatar.jpg"
-                                                        />
+                                                        <Label>Speaker Image</Label>
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Input
+                                                                    value={getDisplayImageUrl(speaker.image || speaker.avatar)}
+                                                                    onChange={(e) => {
+                                                                        // Only allow manual URL entry if it's not a base64 image
+                                                                        if (!e.target.value.startsWith('data:image/')) {
+                                                                            updateSpeaker(index, "image", e.target.value);
+                                                                        }
+                                                                    }}
+                                                                    placeholder="https://example.com/speaker-image.jpg"
+                                                                    className="flex-1"
+                                                                    readOnly={speaker.image?.startsWith('data:image/')}
+                                                                />
+                                                                <input
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    onChange={(e) => handleSpeakerImageUpload(e, index)}
+                                                                    className="hidden"
+                                                                    id={`speaker-upload-${index}`}
+                                                                />
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => document.getElementById(`speaker-upload-${index}`)?.click()}
+                                                                    className="flex items-center space-x-1"
+                                                                >
+                                                                    <Upload className="w-4 h-4" />
+                                                                    <span>Upload</span>
+                                                                </Button>
+                                                                {speaker.image && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => updateSpeaker(index, "image", "")}
+                                                                        className="flex items-center space-x-1 text-red-600 hover:text-red-700"
+                                                                    >
+                                                                        <X className="w-4 h-4" />
+                                                                        <span>Clear</span>
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                            {speaker.image && (
+                                                                <div className="mt-2">
+                                                                    <img
+                                                                        src={speaker.image}
+                                                                        alt="Speaker preview"
+                                                                        className="w-16 h-16 object-cover rounded-lg border"
+                                                                        onError={(e) => {
+                                                                            e.currentTarget.style.display = 'none';
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
