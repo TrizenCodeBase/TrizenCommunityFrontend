@@ -49,6 +49,33 @@ const Contact = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
+        // Client-side validation
+        if (!formData.name.trim()) {
+            alert('Please enter your name');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!formData.email.trim()) {
+            alert('Please enter your email address');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!formData.inquiryType) {
+            alert('Please select an inquiry type');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!formData.subject.trim()) {
+            alert('Please enter a subject');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!formData.message.trim()) {
+            alert('Please enter your message');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:5000/api/contact', {
                 method: 'POST',
@@ -65,7 +92,13 @@ const Contact = () => {
                 console.log('✅ Contact form submitted successfully:', result);
             } else {
                 console.error('❌ Contact form submission failed:', result.message);
-                alert('Failed to send message. Please try again later.');
+                if (result.errors && result.errors.length > 0) {
+                    // Show specific validation errors
+                    const errorMessages = result.errors.map((error: any) => error.msg).join(', ');
+                    alert(`Validation failed: ${errorMessages}`);
+                } else {
+                    alert('Failed to send message. Please try again later.');
+                }
             }
         } catch (error) {
             console.error('❌ Network error:', error);
