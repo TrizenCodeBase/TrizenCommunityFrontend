@@ -127,24 +127,81 @@ const SpeakerApplicationForm: React.FC = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
+        // Client-side validation
+        if (!formData.name.trim()) {
+            toast.error('Name is required');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!formData.email.trim()) {
+            toast.error('Email is required');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!formData.organization.trim()) {
+            toast.error('Organization is required');
+            setIsSubmitting(false);
+            return;
+        }
+        if (formData.expertise.length === 0) {
+            toast.error('At least one expertise area is required');
+            setIsSubmitting(false);
+            return;
+        }
+        if (formData.bio.trim().length < 50) {
+            toast.error('Bio must be at least 50 characters');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
+            // Clean up the data - remove empty strings for optional fields
+            const cleanedData = {
+                ...formData,
+                phone: formData.phone.trim() || undefined,
+                linkedin: formData.linkedin.trim() || undefined,
+                twitter: formData.twitter.trim() || undefined,
+                website: formData.website.trim() || undefined,
+                position: formData.position.trim() || undefined,
+                shortDescription: formData.shortDescription.trim() || undefined,
+                profilePicture: formData.profilePicture.trim() || undefined,
+                portfolio: formData.portfolio.trim() || undefined,
+                previousSpeakingExperience: formData.previousSpeakingExperience.trim() || undefined,
+                availability: formData.availability.trim() || undefined,
+                specialRequirements: formData.specialRequirements.trim() || undefined,
+                eventId: formData.eventId.trim() || undefined
+            };
+
+            console.log('📧 Submitting speaker application with cleaned data:', cleanedData);
+
             const response = await fetch('http://localhost:5000/api/speakers/apply', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(cleanedData),
             });
 
+            console.log('📊 Response status:', response.status);
+
             const result = await response.json();
+            console.log('📊 Full response:', result);
 
             if (result.success) {
                 setIsSubmitted(true);
                 toast.success('Speaker application submitted successfully!');
                 console.log('✅ Speaker application submitted:', result);
             } else {
-                console.error('❌ Speaker application failed:', result.message);
-                toast.error(result.message || 'Failed to submit application. Please try again.');
+                console.error('❌ Speaker application failed:', result);
+                if (result.errors && result.errors.length > 0) {
+                    // Show specific validation errors
+                    const errorMessages = result.errors.map((error: any) => error.msg).join(', ');
+                    console.log('🔍 Validation errors:', result.errors);
+                    toast.error(`Validation failed: ${errorMessages}`);
+                } else {
+                    console.log('🔍 Error message:', result.message);
+                    toast.error(result.message || 'Failed to submit application. Please try again.');
+                }
             }
         } catch (error) {
             console.error('❌ Network error:', error);
@@ -342,7 +399,14 @@ const SpeakerApplicationForm: React.FC = () => {
                                 rows={4}
                                 required
                             />
-                            <p className="text-sm text-gray-500 mt-1">Minimum 50 characters</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {formData.bio.length}/50 characters minimum
+                                {formData.bio.length < 50 && (
+                                    <span className="text-red-500 ml-2">
+                                        ({50 - formData.bio.length} more characters needed)
+                                    </span>
+                                )}
+                            </p>
                         </div>
                         <div>
                             <Label htmlFor="shortDescription">Short Description</Label>
