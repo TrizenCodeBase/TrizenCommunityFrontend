@@ -300,6 +300,11 @@ const EditEventModal = ({ isOpen, onClose, event, onEventUpdated }: EditEventMod
             };
 
             console.log('Updating event data:', eventData);
+            console.log('Speakers data being sent:', formData.speakers);
+            if (formData.speakers.length > 0) {
+                console.log('First speaker data:', formData.speakers[0]);
+                console.log('First speaker image:', formData.speakers[0].image);
+            }
             const updatedEvent = await eventsService.updateEvent(event._id, eventData);
             console.log('Event updated successfully:', updatedEvent);
             toast.success("Event updated successfully!");

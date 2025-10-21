@@ -282,8 +282,7 @@ const Events = () => {
     };
 
     const handleViewEvent = (event: Event) => {
-        setSelectedEvent(event);
-        setShowViewModal(true);
+        navigate(`/events/${event._id}`);
     };
 
     const handleEventUpdated = async () => {

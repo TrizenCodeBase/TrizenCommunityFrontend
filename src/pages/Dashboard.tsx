@@ -26,7 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { eventsService, Event, EventRegistration } from "@/services/events";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
@@ -34,6 +34,7 @@ import { toast } from "sonner";
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const { user, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
     const [userEvents, setUserEvents] = useState<Event[]>([]);
     const [userRegistrations, setUserRegistrations] = useState<EventRegistration[]>([]);
     const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -69,17 +70,13 @@ const Dashboard = () => {
                 setIsLoadingEvents(true);
                 // Get user's event registrations
                 console.log('🔍 Loading registrations for user:', user._id, user.email);
-                console.log('🔍 User object:', user);
-                console.log('🔍 Expected user ID for shivasai Ganeeb: 68f29144c2953755c44d1074');
-                console.log('🔍 Current user ID matches expected:', user._id === '68f29144c2953755c44d1074');
                 const endpoint = `/users/${user._id}/registrations`;
                 console.log('🌐 Calling endpoint:', endpoint);
                 console.log('🔐 Is authenticated:', apiService.isAuthenticated());
                 console.log('🔐 Token exists:', !!apiService.getToken());
+
                 const response = await apiService.get(endpoint);
                 console.log('📡 API Response:', response);
-                console.log('📡 Response success:', response.success);
-                console.log('📡 Response data:', response.data);
 
                 const registrations = (response.data as any)?.registrations || [];
                 console.log('📋 Registrations:', registrations);
@@ -88,11 +85,31 @@ const Dashboard = () => {
                 const registeredEvents = registrations.map((reg: any) => reg.event).filter(Boolean);
                 console.log('🎯 Registered Events:', registeredEvents);
                 console.log('📊 Events count:', registeredEvents.length);
+                console.log('🔍 userEvents state before setUserEvents:', userEvents);
+                console.log('🔍 registeredEvents type:', typeof registeredEvents);
+                console.log('🔍 registeredEvents is array:', Array.isArray(registeredEvents));
+
+                // Log the first event to see its structure
+                if (registeredEvents.length > 0) {
+                    console.log('🔍 First event structure:', registeredEvents[0]);
+                    console.log('🔍 First event title:', registeredEvents[0].title);
+                    console.log('🔍 First event _id:', registeredEvents[0]._id);
+                }
 
                 setUserEvents(registeredEvents);
 
             } catch (error) {
                 console.error('❌ Failed to load user events:', error);
+
+                // If it's an auth error, clear the stored auth data and redirect to login
+                if (error.message.includes('Not authorized') || error.message.includes('401')) {
+                    console.log('🔐 Authentication error detected, clearing stored auth data...');
+                    apiService.removeToken();
+                    toast.error("Session expired. Please log in again.");
+                    // The AuthContext will handle the redirect
+                    return;
+                }
+
                 // Fallback to showing no events if API fails
                 setUserEvents([]);
                 toast.error("Failed to load your events");
@@ -464,6 +481,13 @@ const Dashboard = () => {
                                 </Link>
                             </div>
 
+                            {(() => {
+                                console.log('🎨 Rendering events section:');
+                                console.log('  - isLoadingEvents:', isLoadingEvents);
+                                console.log('  - userEvents.length:', userEvents.length);
+                                console.log('  - userEvents:', userEvents);
+                                return null;
+                            })()}
                             {isLoadingEvents ? (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {[1, 2, 3].map((i) => (
@@ -479,61 +503,66 @@ const Dashboard = () => {
                                 </div>
                             ) : userEvents.length > 0 ? (
                                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {userEvents.map((event) => (
-                                        <Card key={event._id} className="rounded-2xl border-2 border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
-                                            <div className="h-48 overflow-hidden rounded-t-2xl">
-                                                <img
-                                                    src={event.coverImage || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"}
-                                                    alt={event.title}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                                <div className="absolute top-3 left-3">
-                                                    <Badge className="bg-white/90 backdrop-blur-sm text-primary border-0 shadow-md">
-                                                        {event.category}
-                                                    </Badge>
-                                                </div>
-                                            </div>
-                                            <CardContent className="p-6">
-                                                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                                                    {event.title}
-                                                </h3>
-                                                <div className="space-y-2 mb-4">
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <Calendar className="w-4 h-4 mr-2" />
-                                                        <span>
-                                                            {new Date(event.startDate).toLocaleDateString('en-US', {
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                                year: 'numeric'
-                                                            })}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center text-sm text-gray-600">
-                                                        <MapPin className="w-4 h-4 mr-2" />
-                                                        <span>
-                                                            {event.type === 'Online'
-                                                                ? 'Online Event'
-                                                                : typeof event.location === 'string'
-                                                                    ? event.location
-                                                                    : event.location?.venue || event.location?.city || 'Location TBD'
-                                                            }
-                                                        </span>
+                                    {userEvents.map((event, index) => {
+                                        console.log(`🎨 Rendering event ${index}:`, event.title, event._id);
+                                        return (
+                                            <Card key={event._id} className="rounded-2xl border-2 border-gray-200/50 shadow-lg hover:shadow-xl transition-shadow">
+                                                <div className="h-48 overflow-hidden rounded-t-2xl">
+                                                    <img
+                                                        src={event.coverImage || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"}
+                                                        alt={event.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute top-3 left-3">
+                                                        <Badge className="bg-white/90 backdrop-blur-sm text-primary border-0 shadow-md">
+                                                            {event.category}
+                                                        </Badge>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center justify-between">
-                                                    <Badge variant="outline" className="text-green-600 border-green-200">
-                                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                                        Registered
-                                                    </Badge>
-                                                    <Link to={`/events/${event._id}`}>
-                                                        <Button size="sm" variant="outline">
+                                                <CardContent className="p-6">
+                                                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                                                        {event.title}
+                                                    </h3>
+                                                    <div className="space-y-2 mb-4">
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <Calendar className="w-4 h-4 mr-2" />
+                                                            <span>
+                                                                {new Date(event.startDate).toLocaleDateString('en-US', {
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    year: 'numeric'
+                                                                })}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center text-sm text-gray-600">
+                                                            <MapPin className="w-4 h-4 mr-2" />
+                                                            <span>
+                                                                {event.type === 'Online'
+                                                                    ? 'Online Event'
+                                                                    : typeof event.location === 'string'
+                                                                        ? event.location
+                                                                        : event.location?.venue || event.location?.city || 'Location TBD'
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <Badge variant="outline" className="text-green-600 border-green-200">
+                                                            <CheckCircle className="w-3 h-3 mr-1" />
+                                                            Registered
+                                                        </Badge>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => navigate(`/events/${event._id}`)}
+                                                        >
                                                             View Details
                                                         </Button>
-                                                    </Link>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <Card className="rounded-2xl border-2 border-gray-200/50 shadow-lg">

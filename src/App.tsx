@@ -8,6 +8,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Events from "./pages/Events";
 import EventRegistration from "./pages/EventRegistration";
+import EventDetails from "./pages/EventDetails";
 import Dashboard from "./pages/Dashboard";
 import Community from "./pages/Community";
 import About from "./pages/About";
@@ -43,6 +44,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/events/:eventId" element={<EventDetails />} />
               <Route path="/events/:eventId/register" element={<EventRegistration />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Dashboard />} />

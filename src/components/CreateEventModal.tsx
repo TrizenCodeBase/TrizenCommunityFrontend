@@ -194,6 +194,7 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
     };
 
     const addSpeaker = () => {
+        console.log('➕ Adding new speaker');
         setFormData(prev => ({
             ...prev,
             speakers: [...prev.speakers, {
@@ -212,6 +213,7 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
     };
 
     const updateSpeaker = (index: number, field: string, value: string) => {
+        console.log(`🖼️ Updating speaker ${index} field ${field} with value:`, value ? `${value.substring(0, 50)}...` : 'empty');
         setFormData(prev => ({
             ...prev,
             speakers: prev.speakers.map((speaker, i) =>
@@ -249,14 +251,19 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
     };
 
     const handleSpeakerImageUpload = (event: React.ChangeEvent<HTMLInputElement>, speakerIndex: number) => {
+        console.log(`📸 Speaker image upload triggered for speaker ${speakerIndex}`);
         const file = event.target.files?.[0];
         if (file) {
+            console.log(`📸 File selected: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
             const reader = new FileReader();
             reader.onload = (e) => {
                 const result = e.target?.result as string;
+                console.log(`📸 File read result length: ${result.length}`);
                 updateSpeaker(speakerIndex, "image", result);
             };
             reader.readAsDataURL(file);
+        } else {
+            console.log('📸 No file selected');
         }
     };
 
@@ -381,6 +388,13 @@ const CreateEventModal = ({ isOpen, onClose, onEventCreated }: CreateEventModalP
             };
 
             console.log('Submitting event data:', eventData);
+            console.log('Speakers data being sent:', formData.speakers);
+            if (formData.speakers.length > 0) {
+                console.log('First speaker data:', formData.speakers[0]);
+                console.log('First speaker image:', formData.speakers[0].image);
+                console.log('First speaker image length:', formData.speakers[0].image?.length);
+                console.log('First speaker image type:', formData.speakers[0].image?.substring(0, 20));
+            }
             const createdEvent = await eventsService.createEvent(eventData);
             console.log('Event created successfully:', createdEvent);
             toast.success("Event created successfully!");

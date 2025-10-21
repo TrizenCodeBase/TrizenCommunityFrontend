@@ -49,8 +49,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                             setUser(currentUser as any);
                         } catch (error) {
                             console.warn('Token verification failed, using stored user:', error);
-                            // Keep stored user if server verification fails
-                            // Don't clear storage immediately to prevent blank page
+
+                            // If it's an auth error (401), clear the stored data
+                            if (error.message.includes('Not authorized') || error.message.includes('401')) {
+                                console.log('🔐 Authentication error detected, clearing stored auth data...');
+                                apiService.removeToken();
+                                setUser(null);
+                                setIsAuthenticated(false);
+                            }
+                            // Keep stored user for other errors to prevent blank page
                         }
                     }
                 }
