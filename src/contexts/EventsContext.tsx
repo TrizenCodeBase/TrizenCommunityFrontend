@@ -56,7 +56,12 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to fetch events';
             setError(errorMessage);
-            console.error('Fetch events error:', err);
+            console.error('Error loading events:', err);
+
+            // If it's a network error, show a more user-friendly message
+            if (err instanceof Error && err.message.includes('Network error')) {
+                setError('Unable to connect to the server. Please check your internet connection and try again.');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -68,7 +73,8 @@ export const EventsProvider: React.FC<EventsProviderProps> = ({ children }) => {
             const featured = await eventsService.getFeaturedEvents();
             setFeaturedEvents(featured);
         } catch (err) {
-            console.error('Fetch featured events error:', err);
+            console.error('Error loading featured events:', err);
+            // Don't set error state for featured events as it's not critical
         }
     };
 

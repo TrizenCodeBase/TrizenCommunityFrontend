@@ -58,6 +58,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                                 console.log('🔐 Authentication error detected, clearing stored auth data...');
                                 apiService.removeToken();
                                 setUser(null);
+                            } else if (error.message.includes('Network error')) {
+                                console.log('🌐 Network error detected, using stored user data...');
+                                // Keep stored user for network errors to prevent blank page
                             }
                             // Keep stored user for other errors to prevent blank page
                         }

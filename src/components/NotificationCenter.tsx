@@ -206,3 +206,4 @@ const NotificationCenter = ({ onPreferencesChange }: NotificationCenterProps) =>
 };
 
 export default NotificationCenter;
+

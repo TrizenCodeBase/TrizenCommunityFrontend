@@ -41,3 +41,4 @@ window.location.reload();
 ## After Clearing
 Once you log in again, the Dashboard should show your registered events correctly!
 
+

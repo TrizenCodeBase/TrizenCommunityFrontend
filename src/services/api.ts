@@ -1,6 +1,6 @@
-const API_BASE_URL = import.meta.env.MODE === 'production'
-    ? 'https://your-backend-url.vercel.app/api'
-    : 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production'
+    ? 'https://trizencommunitybackend.llp.trizenventures.com/api'
+    : 'http://localhost:5000/api');
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -67,32 +67,49 @@ class ApiService {
     }
 
     private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-        const data = await response.json();
+        try {
+            const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || 'An error occurred');
+            if (!response.ok) {
+                throw new Error(data.message || 'An error occurred');
+            }
+
+            return data;
+        } catch (error) {
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                throw new Error('Network error: Unable to connect to the server. Please check your internet connection.');
+            }
+            if (error instanceof SyntaxError) {
+                throw new Error('Invalid response format from server');
+            }
+            throw error;
         }
-
-        return data;
     }
 
     // Authentication methods
     async login(loginData: LoginData): Promise<{ user: User; token: string }> {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify(loginData),
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify(loginData),
+            });
 
-        const result = await this.handleResponse<{ user: User; token: string }>(response);
+            const result = await this.handleResponse<{ user: User; token: string }>(response);
 
-        if (result.success && result.data) {
-            // Store token in localStorage
-            localStorage.setItem('authToken', result.data.token);
-            localStorage.setItem('user', JSON.stringify(result.data.user));
+            if (result.success && result.data) {
+                // Store token in localStorage
+                localStorage.setItem('authToken', result.data.token);
+                localStorage.setItem('user', JSON.stringify(result.data.user));
+            }
+
+            return result.data!;
+        } catch (error) {
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                throw new Error('Network error: Unable to connect to the server. Please check your internet connection and try again.');
+            }
+            throw error;
         }
-
-        return result.data!;
     }
 
     async register(registerData: RegisterData): Promise<{ user: User; token?: string; requiresVerification?: boolean }> {
@@ -114,13 +131,20 @@ class ApiService {
     }
 
     async getCurrentUser(): Promise<User> {
-        const response = await fetch(`${API_BASE_URL}/auth/me`, {
-            method: 'GET',
-            headers: this.getAuthHeaders(),
-        });
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                method: 'GET',
+                headers: this.getAuthHeaders(),
+            });
 
-        const result = await this.handleResponse<{ user: User }>(response);
-        return result.data!.user;
+            const result = await this.handleResponse<{ user: User }>(response);
+            return result.data!.user;
+        } catch (error) {
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                throw new Error('Network error: Unable to connect to the server. Please check your internet connection and try again.');
+            }
+            throw error;
+        }
     }
 
     async logout(): Promise<void> {
@@ -169,22 +193,29 @@ class ApiService {
 
     // Generic HTTP methods for other services
     async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
-        const url = new URL(`${API_BASE_URL}${endpoint}`);
+        try {
+            const url = new URL(`${API_BASE_URL}${endpoint}`);
 
-        if (params) {
-            Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    url.searchParams.append(key, String(value));
-                }
+            if (params) {
+                Object.entries(params).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null) {
+                        url.searchParams.append(key, String(value));
+                    }
+                });
+            }
+
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                headers: this.getAuthHeaders(),
             });
+
+            return this.handleResponse<T>(response);
+        } catch (error) {
+            if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                throw new Error('Network error: Unable to connect to the server. Please check your internet connection and try again.');
+            }
+            throw error;
         }
-
-        const response = await fetch(url.toString(), {
-            method: 'GET',
-            headers: this.getAuthHeaders(),
-        });
-
-        return this.handleResponse<T>(response);
     }
 
     async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
