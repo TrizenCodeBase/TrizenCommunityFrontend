@@ -1,6 +1,5 @@
-const API_BASE_URL = import.meta.env.MODE === 'production'
-    ? 'https://trizencommunitybackend.llp.trizenventures.com/api'
-    : 'http://localhost:5000/api';
+// Force localhost for development
+const API_BASE_URL = 'http://localhost:5000/api';
 
 interface ApiResponse<T = any> {
     success: boolean;

@@ -15,6 +15,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import StartDiscussion from "./pages/StartDiscussion";
 import OTPVerification from "./pages/OTPVerification";
+import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 import Settings from "./pages/Settings";
 
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/start-discussion" element={<StartDiscussion />} />
               <Route path="/verify-otp" element={<OTPVerification />} />
+              <Route path="/unsubscribe/:token" element={<Unsubscribe />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
