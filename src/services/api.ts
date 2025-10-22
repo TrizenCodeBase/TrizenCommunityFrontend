@@ -1,5 +1,5 @@
-// Force localhost for development
-const API_BASE_URL = 'http://localhost:5000/api';
+// Production API URL
+const API_BASE_URL = 'https://trizencommunitybackend.llp.trizenventures.com/api';
 
 interface ApiResponse<T = any> {
     success: boolean;
