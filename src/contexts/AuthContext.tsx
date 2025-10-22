@@ -29,6 +29,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Compute isAuthenticated based on user existence
+    const isAuthenticated = !!user;
+
     // Check if user is authenticated on app load
     useEffect(() => {
         const checkAuth = async () => {
@@ -55,7 +58,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                                 console.log('🔐 Authentication error detected, clearing stored auth data...');
                                 apiService.removeToken();
                                 setUser(null);
-                                setIsAuthenticated(false);
                             }
                             // Keep stored user for other errors to prevent blank page
                         }
