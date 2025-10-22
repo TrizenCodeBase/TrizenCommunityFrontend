@@ -1,18 +1,29 @@
-import { Calendar, Info, Mail, Search, Menu, X, FileText, User, LogOut, Settings, XCircle } from "lucide-react";
+import { Calendar, Info, Mail, Search, Menu, X, FileText, User, LogOut, Settings, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthModal from "./AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import NotificationCenter from "./NotificationCenter";
+import { eventsService } from "@/services/events";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isResourcesModalOpen, setIsResourcesModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  // Debug search modal state
+  console.log('Search modal state:', isSearchModalOpen);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
 
   const navLinks = [
@@ -20,6 +31,66 @@ const Navbar = () => {
     { name: "About", href: "/about", icon: Info },
     { name: "Contact", href: "/contact", icon: Mail },
   ];
+
+  // Search functionality
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Search through navigation links
+      const navResults = navLinks.filter(link =>
+        link.name.toLowerCase().includes(query.toLowerCase())
+      ).map(link => ({
+        type: 'navigation',
+        title: link.name,
+        description: `Navigate to ${link.name} page`,
+        href: link.href,
+        icon: link.icon
+      }));
+
+      // Search through events
+      let eventResults = [];
+      try {
+        const eventsResponse = await eventsService.getEvents({ search: query, limit: 5 });
+        eventResults = eventsResponse.events.map(event => ({
+          type: 'event',
+          title: event.title,
+          description: `${event.category} • ${new Date(event.startDate).toLocaleDateString()}`,
+          href: `/events/${event._id}`,
+          icon: Calendar
+        }));
+      } catch (error) {
+        console.log('Events search failed, continuing with navigation results only');
+      }
+
+      // Combine results
+      const results = [...navResults, ...eventResults];
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(searchQuery);
+  };
+
+  const handleSearchResultClick = (result: any) => {
+    if (result.href) {
+      navigate(result.href);
+      setIsSearchModalOpen(false);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  };
 
   return (
     <>
@@ -57,6 +128,89 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Search Modal */}
+      {isSearchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20" style={{ zIndex: 9999 }}>
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsSearchModalOpen(false)} />
+          <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Search</h3>
+                <button
+                  onClick={() => setIsSearchModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Search Input */}
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search for pages, events, or content..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    handleSearch(e.target.value);
+                  }}
+                  className="pl-10 pr-4 h-12 text-lg border-gray-300 focus:border-primary"
+                  autoFocus
+                />
+              </form>
+            </div>
+
+            {/* Search Results */}
+            <div className="max-h-96 overflow-y-auto">
+              {isSearching ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-gray-600">Searching...</span>
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="p-4 space-y-2">
+                  {searchResults.map((result, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSearchResultClick(result)}
+                      className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <result.icon className={`w-5 h-5 ${result.type === 'event' ? 'text-blue-500' : 'text-gray-400'}`} />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{result.title}</h4>
+                          <p className="text-sm text-gray-600">{result.description}</p>
+                          {result.type === 'event' && (
+                            <span className="inline-block mt-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                              Event
+                            </span>
+                          )}
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-400 ml-auto" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : searchQuery ? (
+                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                  <Search className="w-12 h-12 mb-2 opacity-50" />
+                  <p>No results found for "{searchQuery}"</p>
+                  <p className="text-sm">Try searching for "Events", "About", or "Contact"</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                  <Search className="w-12 h-12 mb-2 opacity-50" />
+                  <p>Start typing to search...</p>
+                  <p className="text-sm">Search for pages, events, or content</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-lg shadow-gray-900/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -126,11 +280,19 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => alert('Search functionality (Demo)')}
+                onClick={() => {
+                  console.log('Search button clicked');
+                  setIsSearchModalOpen(true);
+                }}
                 className="rounded-lg hover:bg-gray-100 transition-colors duration-200 w-9 h-9"
               >
                 <Search className="w-4 h-4" />
               </Button>
+
+              {/* Notification Center */}
+              {isAuthenticated && (
+                <NotificationCenter />
+              )}
 
               {isAuthenticated && user ? (
                 <DropdownMenu>
@@ -244,7 +406,27 @@ const Navbar = () => {
                   </Link>
                 );
               })}
+
+              {/* Mobile Search Button */}
+              <button
+                onClick={() => {
+                  setIsSearchModalOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 rounded-lg transition-all duration-200 font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center"
+              >
+                <Search className="w-4 h-4 mr-3" />
+                Search
+              </button>
+
               <div className="flex flex-col space-y-3 px-4 pt-6 border-t border-gray-200/50">
+                {/* Mobile Notification Center */}
+                {isAuthenticated && (
+                  <div className="px-3 py-2">
+                    <NotificationCenter />
+                  </div>
+                )}
+
                 {isAuthenticated && user ? (
                   <>
                     <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">

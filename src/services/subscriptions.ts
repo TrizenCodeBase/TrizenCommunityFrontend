@@ -55,7 +55,14 @@ class SubscriptionService {
 
             const response = await apiService.post<{ success: boolean; message: string; isSubscribed: boolean }>('/subscriptions/subscribe');
             console.log('📡 Authenticated subscribe response:', response);
-            return response.data || response;
+
+            // Extract the actual data from the response
+            const data = response.data || response;
+            return {
+                success: data.success || true,
+                message: data.message || 'Successfully subscribed',
+                isSubscribed: (data as any).isSubscribed || true
+            };
         } catch (error) {
             console.error('❌ Authenticated subscribe error:', error);
             console.error('❌ Error details:', {
@@ -64,7 +71,8 @@ class SubscriptionService {
             });
             return {
                 success: false,
-                message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}`
+                message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                isSubscribed: false
             };
         }
     }
@@ -78,7 +86,14 @@ class SubscriptionService {
 
             const response = await apiService.post<{ success: boolean; message: string; isSubscribed: boolean }>('/subscriptions/unsubscribe');
             console.log('📡 Unsubscribe response:', response);
-            return response.data || response;
+
+            // Extract the actual data from the response
+            const data = response.data || response;
+            return {
+                success: data.success || true,
+                message: data.message || 'Successfully unsubscribed',
+                isSubscribed: (data as any).isSubscribed || false
+            };
         } catch (error) {
             console.error('❌ Unsubscribe error:', error);
             console.error('❌ Error details:', {
@@ -87,23 +102,26 @@ class SubscriptionService {
             });
             return {
                 success: false,
-                message: `Unsubscribe error: ${error instanceof Error ? error.message : 'Unknown error'}`
+                message: `Unsubscribe error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                isSubscribed: true
             };
         }
     }
 
     // Update subscription preferences
-    async updatePreferences(preferences: SubscriptionPreferences): Promise<{
-        success: boolean;
-        message: string;
-        data: SubscriptionStatus;
-    }> {
-        const response = await apiService.put<{
-            success: boolean;
-            message: string;
-            data: SubscriptionStatus;
-        }>('/subscriptions/preferences', preferences);
-        return response.data || response;
+    async updatePreferences(preferences: SubscriptionPreferences): Promise<SubscriptionStatus> {
+        try {
+            console.log('🔧 Updating preferences:', preferences);
+            const response = await apiService.put<SubscriptionStatus>('/subscriptions/preferences', preferences);
+            console.log('📡 Preferences update response:', response);
+
+            // The backend returns the subscription status directly
+            const data = response.data || response;
+            return data as SubscriptionStatus;
+        } catch (error) {
+            console.error('❌ Error updating preferences:', error);
+            throw error;
+        }
     }
 
     // Helper method to get the correct API base URL

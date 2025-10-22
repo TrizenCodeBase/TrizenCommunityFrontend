@@ -11,7 +11,7 @@ import { toast } from "sonner";
 interface EventRegistrationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    eventId: number;
+    eventId: string;
     eventTitle: string;
 }
 

@@ -173,7 +173,7 @@ const EventRegistration = () => {
                         createdAt: "2025-01-01T00:00:00Z",
                         updatedAt: "2025-01-01T00:00:00Z"
                     }
-                } as { [key: string]: Event };
+                } as { [key: string]: any };
 
                 if (demoEvents[eventId]) {
                     setEvent(demoEvents[eventId]);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2, MoreVertical, Edit, Trash2, Grid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +30,7 @@ const Events = () => {
     const [showSpeakerForm, setShowSpeakerForm] = useState(false);
     const [events, setEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     // Check if user is admin
     const isAdmin = user?.isAdmin || false;
@@ -407,140 +408,259 @@ const Events = () => {
                         )}
                     </div>
 
-                    {/* Quick Filters */}
-                    <div className="flex flex-wrap gap-3">
-                        <span className="text-sm font-medium text-gray-600 mr-2">Quick filters:</span>
-                        {quickFilters.map((filter) => (
-                            <Button
-                                key={filter}
-                                variant={selectedCategory === filter ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setSelectedCategory(filter)}
-                                className={`${selectedCategory === filter
-                                    ? "bg-primary text-white"
-                                    : "border-gray-300 text-gray-600 hover:border-primary hover:text-primary"
-                                    }`}
-                            >
-                                {filter}
-                            </Button>
-                        ))}
+                    {/* Quick Filters and View Options */}
+                    <div className="flex flex-wrap justify-between items-center gap-4">
+                        {/* Quick Filters */}
+                        <div className="flex flex-wrap gap-3">
+                            <span className="text-sm font-medium text-gray-600 mr-2">Quick filters:</span>
+                            {quickFilters.map((filter) => (
+                                <Button
+                                    key={filter}
+                                    variant={selectedCategory === filter ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setSelectedCategory(filter)}
+                                    className={`${selectedCategory === filter
+                                        ? "bg-primary text-white"
+                                        : "border-gray-300 text-gray-600 hover:border-primary hover:text-primary"
+                                        }`}
+                                >
+                                    {filter}
+                                </Button>
+                            ))}
+                        </div>
+
+                        {/* View Toggle */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-600">View:</span>
+                            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                                <Button
+                                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setViewMode('grid')}
+                                    className="rounded-none border-0"
+                                >
+                                    <Grid className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setViewMode('list')}
+                                    className="rounded-none border-0"
+                                >
+                                    <List className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Events Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                    {filteredEvents.map((event) => (
-                        <Card key={event._id} className="group overflow-hidden rounded-2xl border-2 border-gray-200/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-                            {/* Event Image */}
-                            <div className="relative h-48 overflow-hidden">
-                                <img
-                                    src={event.coverImage || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"}
-                                    alt={event.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    onError={(e) => {
-                                        // Fallback to gradient with icon if image fails
-                                        e.currentTarget.style.display = 'none';
-                                        const parent = e.currentTarget.parentElement;
-                                        if (parent) {
-                                            parent.classList.add('bg-gradient-to-br', 'from-primary/10', 'to-accent/10');
-                                            const fallbackIcon = document.createElement('div');
-                                            fallbackIcon.className = 'absolute inset-0 flex items-center justify-center';
-                                            fallbackIcon.innerHTML = '<svg class="w-16 h-16 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
-                                            parent.appendChild(fallbackIcon);
-                                        }
-                                    }}
-                                />
-                                {/* Category Badge Overlay */}
-                                <div className="absolute top-3 left-3">
-                                    <Badge className="bg-white/90 backdrop-blur-sm text-primary border-0 shadow-md">
-                                        {event.category}
-                                    </Badge>
-                                </div>
-
-                                {/* Admin Actions Menu */}
-                                {isAdmin && (
-                                    <div className="absolute top-3 right-3">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 bg-white/90 backdrop-blur-sm hover:bg-white/95 shadow-md"
-                                                >
-                                                    <MoreVertical className="w-4 h-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEditEvent(event)}>
-                                                    <Edit className="w-4 h-4 mr-2" />
-                                                    Edit Event
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    onClick={() => handleDeleteEvent(event)}
-                                                    className="text-red-600 focus:text-red-600"
-                                                >
-                                                    <Trash2 className="w-4 h-4 mr-2" />
-                                                    Delete Event
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                )}
-                            </div>
-
-                            <CardContent className="p-6">
-                                {/* Event Title */}
-                                <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
-                                    {event.title}
-                                </h3>
-
-                                {/* Event Details */}
-                                <div className="space-y-2 mb-4">
-                                    <div className="flex items-center text-gray-600">
-                                        <Calendar className="w-4 h-4 mr-3 text-primary" />
-                                        <span className="text-sm">{formatEventDate(event.startDate)} • {formatEventTime(event.startDate, event.endDate)}</span>
-                                    </div>
-                                    <div className="flex items-center text-gray-600">
-                                        <MapPin className="w-4 h-4 mr-3 text-primary" />
-                                        <span className="text-sm">{getEventLocation(event)}</span>
-                                    </div>
-                                </div>
-
-                                {/* Description */}
-                                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                                    {event.description}
-                                </p>
-
-                                {/* Action Buttons */}
-                                <div className="flex space-x-2">
-                                    <Button
-                                        onClick={() => {
-                                            if (!isAuthenticated) {
-                                                toast.error("Please login to register for events");
-                                                return;
+                {/* Events Display - Grid and List Views */}
+                {viewMode === 'grid' ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                        {filteredEvents.map((event) => (
+                            <Card key={event._id} className="group overflow-hidden rounded-2xl border-2 border-gray-200/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
+                                {/* Event Image */}
+                                <div className="relative h-48 overflow-hidden">
+                                    <img
+                                        src={event.coverImage || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"}
+                                        alt={event.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        onError={(e) => {
+                                            // Fallback to gradient with icon if image fails
+                                            e.currentTarget.style.display = 'none';
+                                            const parent = e.currentTarget.parentElement;
+                                            if (parent) {
+                                                parent.classList.add('bg-gradient-to-br', 'from-primary/10', 'to-accent/10');
+                                                const fallbackIcon = document.createElement('div');
+                                                fallbackIcon.className = 'absolute inset-0 flex items-center justify-center';
+                                                fallbackIcon.innerHTML = '<svg class="w-16 h-16 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                                parent.appendChild(fallbackIcon);
                                             }
-                                            navigate(`/events/${event._id}/register`);
                                         }}
-                                        className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white"
-                                    >
-                                        Register
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => handleViewEvent(event)}
-                                        className="border-gray-300 hover:border-primary hover:text-primary"
-                                    >
-                                        View Details
-                                    </Button>
-                                    <Button variant="outline" size="icon" className="border-gray-300 hover:border-primary hover:text-primary">
-                                        <Share2 className="w-4 h-4" />
-                                    </Button>
+                                    />
+                                    {/* Category Badge Overlay */}
+                                    <div className="absolute top-3 left-3">
+                                        <Badge className="bg-white/90 backdrop-blur-sm text-primary border-0 shadow-md">
+                                            {event.category}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Admin Actions Menu */}
+                                    {isAdmin && (
+                                        <div className="absolute top-3 right-3">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 bg-white/90 backdrop-blur-sm hover:bg-white/95 shadow-md"
+                                                    >
+                                                        <MoreVertical className="w-4 h-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleEditEvent(event)}>
+                                                        <Edit className="w-4 h-4 mr-2" />
+                                                        Edit Event
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDeleteEvent(event)}
+                                                        className="text-red-600 focus:text-red-600"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Delete Event
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    )}
                                 </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+
+                                <CardContent className="p-6">
+                                    {/* Event Title */}
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                                        {event.title}
+                                    </h3>
+
+                                    {/* Event Details */}
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex items-center text-gray-600">
+                                            <Calendar className="w-4 h-4 mr-3 text-primary" />
+                                            <span className="text-sm">{formatEventDate(event.startDate)} • {formatEventTime(event.startDate, event.endDate)}</span>
+                                        </div>
+                                        <div className="flex items-center text-gray-600">
+                                            <MapPin className="w-4 h-4 mr-3 text-primary" />
+                                            <span className="text-sm">{getEventLocation(event)}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Description */}
+                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                        {event.description}
+                                    </p>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex space-x-2">
+                                        <Button
+                                            onClick={() => {
+                                                if (!isAuthenticated) {
+                                                    toast.error("Please login to register for events");
+                                                    return;
+                                                }
+                                                navigate(`/events/${event._id}/register`);
+                                            }}
+                                            className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white"
+                                        >
+                                            Register
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => handleViewEvent(event)}
+                                            className="border-gray-300 hover:border-primary hover:text-primary"
+                                        >
+                                            View Details
+                                        </Button>
+                                        <Button variant="outline" size="icon" className="border-gray-300 hover:border-primary hover:text-primary">
+                                            <Share2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    /* List View */
+                    <div className="space-y-4 mb-16">
+                        {filteredEvents.map((event) => (
+                            <Card key={event._id} className="p-6 hover:shadow-lg transition-all duration-300">
+                                <div className="flex gap-6">
+                                    <div className="w-32 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                                        <img
+                                            src={event.coverImage || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"}
+                                            alt={event.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="text-xl font-bold text-gray-900">{event.title}</h3>
+                                            <div className="flex items-center gap-2">
+                                                <Badge className="bg-primary/10 text-primary">{event.category}</Badge>
+                                                {isAdmin && (
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8"
+                                                            >
+                                                                <MoreVertical className="w-4 h-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onClick={() => handleEditEvent(event)}>
+                                                                <Edit className="w-4 h-4 mr-2" />
+                                                                Edit Event
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleDeleteEvent(event)}
+                                                                className="text-red-600 focus:text-red-600"
+                                                            >
+                                                                <Trash2 className="w-4 h-4 mr-2" />
+                                                                Delete Event
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
+                                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                                            <div className="flex items-center gap-1">
+                                                <Calendar className="w-4 h-4" />
+                                                {new Date(event.startDate).toLocaleDateString()}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="w-4 h-4" />
+                                                {new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <MapPin className="w-4 h-4" />
+                                                {getEventLocation(event)}
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                onClick={() => {
+                                                    if (!isAuthenticated) {
+                                                        toast.error("Please login to register for events");
+                                                        return;
+                                                    }
+                                                    navigate(`/events/${event._id}/register`);
+                                                }}
+                                                className="bg-primary hover:bg-primary-dark text-white"
+                                            >
+                                                Register
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => handleViewEvent(event)}
+                                                className="border-gray-300 hover:border-primary hover:text-primary"
+                                            >
+                                                View Details
+                                            </Button>
+                                            <Button variant="outline" size="icon" className="border-gray-300 hover:border-primary hover:text-primary">
+                                                <Share2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                )}
 
                 {/* Load More Button */}
                 <div className="text-center">
@@ -683,4 +803,3 @@ const Events = () => {
 };
 
 export default Events;
-

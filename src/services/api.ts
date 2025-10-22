@@ -1,5 +1,6 @@
-// Production API URL
-const API_BASE_URL = 'https://trizencommunitybackend.llp.trizenventures.com/api';
+const API_BASE_URL = import.meta.env.MODE === 'production'
+    ? 'https://your-backend-url.vercel.app/api'
+    : 'http://localhost:5000/api';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -29,16 +30,6 @@ interface User {
     isEmailVerified: boolean;
     isAdmin: boolean;
     isModerator: boolean;
-    preferences?: {
-        emailNotifications: boolean;
-        eventNotifications: boolean;
-        newsletter: boolean;
-        privacy?: {
-            profileVisibility: string;
-            showEmail: boolean;
-            showLocation: boolean;
-        };
-    };
     createdAt: string;
     updatedAt: string;
 }
@@ -58,8 +49,6 @@ interface RegisterData {
 class ApiService {
     private getAuthHeaders(): HeadersInit {
         const token = localStorage.getItem('authToken');
-        console.log('🔍 Auth token exists:', !!token);
-        console.log('🔍 Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
         return {
             'Content-Type': 'application/json',
             ...(token && { Authorization: `Bearer ${token}` }),
@@ -78,17 +67,10 @@ class ApiService {
     }
 
     private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-        let data;
-
-        try {
-            data = await response.json();
-        } catch (error) {
-            // If response is not JSON (network error, server error, etc.)
-            throw new Error(`Network error: ${response.status} ${response.statusText}`);
-        }
+        const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(data.message || 'An error occurred');
         }
 
         return data;
@@ -232,45 +214,6 @@ class ApiService {
         });
 
         return this.handleResponse<T>(response);
-    }
-
-    // User profile methods
-    async updateProfile(userId: string, profileData: Partial<User>): Promise<{ user: User }> {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-            method: 'PUT',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify(profileData),
-        });
-
-        const result = await this.handleResponse<{ user: User }>(response);
-
-        if (result.success && result.data) {
-            // Update stored user data
-            localStorage.setItem('user', JSON.stringify(result.data.user));
-        }
-
-        return result.data!;
-    }
-
-    async updatePreferences(userId: string, preferences: any): Promise<{ preferences: any }> {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}/preferences`, {
-            method: 'PUT',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify(preferences),
-        });
-
-        const result = await this.handleResponse<{ preferences: any }>(response);
-        return result.data!;
-    }
-
-    async changePassword(userId: string, passwordData: { currentPassword: string; newPassword: string }): Promise<void> {
-        const response = await fetch(`${API_BASE_URL}/users/${userId}/password`, {
-            method: 'PUT',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify(passwordData),
-        });
-
-        await this.handleResponse(response);
     }
 
     // Utility methods

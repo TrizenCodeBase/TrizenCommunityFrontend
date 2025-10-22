@@ -11,13 +11,15 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { apiService } from "@/services/api";
 import { subscriptionService, SubscriptionStatus } from "@/services/subscriptions";
 
 const Settings = () => {
     const { user, isAuthenticated, updateUser, refreshUser } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState("profile");
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -115,6 +117,23 @@ const Settings = () => {
             });
         }
     }, [user]);
+
+    // Handle URL parameters and set active tab
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        const token = searchParams.get('token');
+
+        if (tab === 'emails') {
+            setActiveTab('emails');
+            // If there's a token, we could potentially auto-unsubscribe
+            if (token) {
+                console.log('Email unsubscribe token received:', token);
+                // Could add auto-unsubscribe logic here if needed
+            }
+        } else if (tab) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
 
     // Load subscription status when authenticated
     useEffect(() => {
@@ -255,22 +274,38 @@ const Settings = () => {
     };
 
     const handleSubscriptionPreferenceChange = async (preference: keyof SubscriptionStatus['preferences'], value: boolean) => {
-        if (!subscriptionStatus) return;
+        if (!subscriptionStatus) {
+            console.log('❌ No subscription status available');
+            return;
+        }
+
+        console.log('🔄 Toggle clicked:', { preference, value });
+        console.log('📊 Current subscription status:', subscriptionStatus);
 
         try {
             setSubscriptionLoading(true);
+            console.log('📤 Sending preference update...');
+
             const result = await subscriptionService.updatePreferences({
                 [preference]: value
             });
 
+            console.log('📥 Preference update result:', result);
+
             if (result.success) {
                 toast.success("Subscription preferences updated!");
+                console.log('✅ Updating local state with:', result.data);
                 setSubscriptionStatus(result.data);
             } else {
+                console.log('❌ Update failed:', result.message);
                 toast.error(result.message);
             }
         } catch (error) {
-            console.error('Subscription preference update error:', error);
+            console.error('❌ Subscription preference update error:', error);
+            console.error('Error details:', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
             toast.error("Failed to update subscription preferences");
         } finally {
             setSubscriptionLoading(false);
@@ -291,7 +326,7 @@ const Settings = () => {
                     </p>
                 </div>
 
-                <Tabs defaultValue="profile" className="space-y-6">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                     <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 lg:w-auto lg:inline-grid">
                         <TabsTrigger value="profile" className="flex items-center space-x-2">
                             <User className="w-4 h-4" />
@@ -305,7 +340,7 @@ const Settings = () => {
                             <Bell className="w-4 h-4" />
                             <span>Notifications</span>
                         </TabsTrigger>
-                        <TabsTrigger value="subscriptions" className="flex items-center space-x-2">
+                        <TabsTrigger value="emails" className="flex items-center space-x-2">
                             <Mail className="w-4 h-4" />
                             <span>Emails</span>
                         </TabsTrigger>
@@ -576,7 +611,7 @@ const Settings = () => {
                     </TabsContent>
 
                     {/* Email Subscription Settings */}
-                    <TabsContent value="subscriptions" className="space-y-6">
+                    <TabsContent value="emails" className="space-y-6">
                         <Card className="rounded-2xl border-2 border-gray-200/50 shadow-lg">
                             <CardHeader>
                                 <CardTitle className="flex items-center">

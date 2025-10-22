@@ -20,6 +20,9 @@ const AuthModal = ({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) =>
     const [error, setError] = useState<string | null>(null);
     const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
     const [showResendOption, setShowResendOption] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+    const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
     const { login } = useAuth(); // Only use login from AuthContext
 
     // Reset activeTab when modal opens with new defaultTab
@@ -29,6 +32,9 @@ const AuthModal = ({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) =>
             setError(null);
             setShowResendOption(false);
             setUnverifiedEmail(null);
+            setShowForgotPassword(false);
+            setForgotPasswordEmail("");
+            setForgotPasswordSuccess(false);
         }
     }, [isOpen, defaultTab]);
     const [loginData, setLoginData] = useState({
@@ -67,15 +73,27 @@ const AuthModal = ({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) =>
             onClose();
             setLoginData({ email: "", password: "" });
         } catch (error: any) {
-            const errorMessage = error.message || "Login failed. Please try again.";
-            setError(errorMessage);
+            console.error('Login error:', error);
+            let errorMessage = "Login failed. Please try again.";
 
-            // Check if error is about email verification
-            if (errorMessage.toLowerCase().includes('verify your email') ||
-                errorMessage.toLowerCase().includes('not verified')) {
-                setShowResendOption(true);
-                setUnverifiedEmail(loginData.email);
+            // Provide more specific error messages
+            if (error.message) {
+                if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                    errorMessage = "Invalid email or password. Please check your credentials and try again.";
+                } else if (error.message.includes('404') || error.message.includes('Not Found')) {
+                    errorMessage = "No account found with this email address. Please check your email or sign up.";
+                } else if (error.message.includes('verify') || error.message.includes('verification')) {
+                    errorMessage = "Please verify your email address before logging in.";
+                    setShowResendOption(true);
+                    setUnverifiedEmail(loginData.email);
+                } else if (error.message.includes('Network error') || error.message.includes('fetch')) {
+                    errorMessage = "Network error. Please check your internet connection and try again.";
+                } else {
+                    errorMessage = error.message;
+                }
             }
+
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -103,6 +121,39 @@ const AuthModal = ({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) =>
             });
         } catch (error: any) {
             setError(error.message || "Failed to resend verification code. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleForgotPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!forgotPasswordEmail.trim()) {
+            setError("Please enter your email address.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            await authService.forgotPassword(forgotPasswordEmail);
+            setForgotPasswordSuccess(true);
+        } catch (error: any) {
+            console.error('Forgot password error:', error);
+            let errorMessage = "Failed to send password reset email. Please try again.";
+
+            if (error.message) {
+                if (error.message.includes('404') || error.message.includes('Not Found')) {
+                    errorMessage = "No account found with this email address.";
+                } else if (error.message.includes('Network error') || error.message.includes('fetch')) {
+                    errorMessage = "Network error. Please check your internet connection and try again.";
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -264,76 +315,178 @@ const AuthModal = ({ isOpen, onClose, defaultTab = "login" }: AuthModalProps) =>
                     )}
 
                     {activeTab === "login" ? (
-                        // Login Form
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="login-email" className="text-sm font-semibold text-gray-700 flex items-center">
-                                    <Mail className="w-4 h-4 mr-2 text-blue-600" />
-                                    Email Address
-                                </Label>
-                                <Input
-                                    id="login-email"
-                                    type="email"
-                                    placeholder="your.email@example.com"
-                                    value={loginData.email}
-                                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                                    required
-                                    className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                />
-                            </div>
+                        showForgotPassword ? (
+                            // Forgot Password Form
+                            <div className="space-y-6">
+                                <div className="text-center">
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">Reset Your Password</h3>
+                                    <p className="text-gray-600 text-sm">
+                                        Enter your email address and we'll send you a link to reset your password.
+                                    </p>
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="login-password" className="text-sm font-semibold text-gray-700 flex items-center">
-                                    <Lock className="w-4 h-4 mr-2 text-blue-600" />
-                                    Password
-                                </Label>
-                                <Input
-                                    id="login-password"
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    value={loginData.password}
-                                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                                    required
-                                    className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between text-sm">
-                                <label className="flex items-center">
-                                    <input type="checkbox" className="mr-2 rounded" />
-                                    <span className="text-gray-600">Remember me</span>
-                                </label>
-                                <a href="#forgot" className="text-blue-600 hover:underline">
-                                    Forgot password?
-                                </a>
-                            </div>
-
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full h-12 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white font-semibold text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                        Signing In...
-                                    </>
+                                {forgotPasswordSuccess ? (
+                                    <div className="text-center space-y-4">
+                                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                                            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-lg font-semibold text-gray-900 mb-2">Email Sent!</h4>
+                                            <p className="text-gray-600 text-sm">
+                                                We've sent a password reset link to <strong>{forgotPasswordEmail}</strong>
+                                            </p>
+                                            <p className="text-gray-500 text-xs mt-2">
+                                                Check your email and click the link to reset your password.
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setShowForgotPassword(false);
+                                                    setForgotPasswordSuccess(false);
+                                                    setForgotPasswordEmail("");
+                                                }}
+                                                className="flex-1"
+                                            >
+                                                Back to Login
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                onClick={() => {
+                                                    setForgotPasswordSuccess(false);
+                                                    setForgotPasswordEmail("");
+                                                }}
+                                                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                                            >
+                                                Send Another Email
+                                            </Button>
+                                        </div>
+                                    </div>
                                 ) : (
-                                    "Sign In"
-                                )}
-                            </Button>
+                                    <form onSubmit={handleForgotPassword} className="space-y-6">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="forgot-email" className="text-sm font-semibold text-gray-700 flex items-center">
+                                                <Mail className="w-4 h-4 mr-2 text-blue-600" />
+                                                Email Address
+                                            </Label>
+                                            <Input
+                                                id="forgot-email"
+                                                type="email"
+                                                placeholder="your.email@example.com"
+                                                value={forgotPasswordEmail}
+                                                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                                                required
+                                                className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
 
-                            <p className="text-center text-sm text-gray-600">
-                                Don't have an account?{" "}
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab("signup")}
-                                    className="text-blue-600 hover:underline font-semibold"
+                                        <Button
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                            className="w-full h-12 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white font-semibold text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                                    Sending Reset Link...
+                                                </>
+                                            ) : (
+                                                "Send Reset Link"
+                                            )}
+                                        </Button>
+
+                                        <div className="text-center">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowForgotPassword(false)}
+                                                className="text-blue-600 hover:underline text-sm"
+                                            >
+                                                ← Back to Login
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        ) : (
+                            // Login Form
+                            <form onSubmit={handleLogin} className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="login-email" className="text-sm font-semibold text-gray-700 flex items-center">
+                                        <Mail className="w-4 h-4 mr-2 text-blue-600" />
+                                        Email Address
+                                    </Label>
+                                    <Input
+                                        id="login-email"
+                                        type="email"
+                                        placeholder="your.email@example.com"
+                                        value={loginData.email}
+                                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                                        required
+                                        className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="login-password" className="text-sm font-semibold text-gray-700 flex items-center">
+                                        <Lock className="w-4 h-4 mr-2 text-blue-600" />
+                                        Password
+                                    </Label>
+                                    <Input
+                                        id="login-password"
+                                        type="password"
+                                        placeholder="Enter your password"
+                                        value={loginData.password}
+                                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                                        required
+                                        className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between text-sm">
+                                    <label className="flex items-center">
+                                        <input type="checkbox" className="mr-2 rounded" />
+                                        <span className="text-gray-600">Remember me</span>
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowForgotPassword(true)}
+                                        className="text-blue-600 hover:underline"
+                                    >
+                                        Forgot password?
+                                    </button>
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white font-semibold text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Sign up here
-                                </button>
-                            </p>
-                        </form>
+                                    {isSubmitting ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                            Signing In...
+                                        </>
+                                    ) : (
+                                        "Sign In"
+                                    )}
+                                </Button>
+
+                                <p className="text-center text-sm text-gray-600">
+                                    Don't have an account?{" "}
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab("signup")}
+                                        className="text-blue-600 hover:underline font-semibold"
+                                    >
+                                        Sign up here
+                                    </button>
+                                </p>
+                            </form>
+                        )
                     ) : (
                         // Signup Form
                         <form onSubmit={handleSignup} className="space-y-6">
