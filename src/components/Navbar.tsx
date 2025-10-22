@@ -1,4 +1,4 @@
-import { Calendar, Info, Mail, Search, Menu, X, FileText, User, LogOut, Settings } from "lucide-react";
+import { Calendar, Info, Mail, Search, Menu, X, FileText, User, LogOut, Settings, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -6,16 +6,17 @@ import AuthModal from "./AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isResourcesModalOpen, setIsResourcesModalOpen] = useState(false);
   const location = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
 
   const navLinks = [
     { name: "Events", href: "/events", icon: Calendar },
-    { name: "Resources", href: null, icon: FileText, isPlaceholder: true },
     { name: "About", href: "/about", icon: Info },
     { name: "Contact", href: "/contact", icon: Mail },
   ];
@@ -23,6 +24,39 @@ const Navbar = () => {
   return (
     <>
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} defaultTab="login" />
+
+      {/* Resources Coming Soon Modal */}
+      {isResourcesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsResourcesModalOpen(false)} />
+          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Resources</h3>
+              <button
+                onClick={() => setIsResourcesModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="text-center py-8">
+              <FileText className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+              <h4 className="text-xl font-semibold text-gray-900 mb-2">Coming Soon!</h4>
+              <p className="text-gray-600">
+                We're working hard to bring you valuable resources. Stay tuned for updates!
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={() => setIsResourcesModalOpen(false)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Got it
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-lg shadow-gray-900/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -41,22 +75,37 @@ const Navbar = () => {
 
             {/* Enhanced Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.href;
+              {/* Events Link */}
+              <Link
+                to="/events"
+                className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium text-sm ${location.pathname === "/events"
+                  ? "text-blue-600 bg-blue-50 border border-blue-200"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+              >
+                Events
+              </Link>
 
-                if (link.isPlaceholder) {
-                  return (
+              {/* Resources Link with Tooltip - Positioned after Events */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <button
-                      key={link.name}
-                      onClick={() => alert('Resources section coming soon!')}
-                      className="px-4 py-2 rounded-lg transition-all duration-200 font-medium text-sm text-gray-400 hover:text-gray-500 hover:bg-gray-50 cursor-not-allowed"
-                      title="Coming Soon"
+                      onClick={() => setIsResourcesModalOpen(true)}
+                      className="px-4 py-2 rounded-lg transition-all duration-200 font-medium text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     >
-                      {link.name}
+                      Resources
                     </button>
-                  );
-                }
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Coming Soon</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
+              {/* Other Navigation Links */}
+              {navLinks.slice(1).map((link) => {
+                const isActive = location.pathname === link.href;
                 return (
                   <Link
                     key={link.name}
@@ -155,25 +204,32 @@ const Navbar = () => {
           {/* Enhanced Mobile Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden py-6 space-y-2 animate-slide-up border-t border-gray-200/50 mt-2">
-              {navLinks.map((link) => {
+              {/* Events Link */}
+              <Link
+                to="/events"
+                className={`px-4 py-3 rounded-lg transition-all duration-200 font-medium ${location.pathname === "/events"
+                  ? "text-blue-600 bg-blue-50 border border-blue-200"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Events
+              </Link>
+
+              {/* Resources Link for Mobile - Positioned after Events */}
+              <button
+                onClick={() => {
+                  setIsResourcesModalOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 rounded-lg transition-all duration-200 font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              >
+                Resources
+              </button>
+
+              {/* Other Navigation Links */}
+              {navLinks.slice(1).map((link) => {
                 const isActive = location.pathname === link.href;
-
-                if (link.isPlaceholder) {
-                  return (
-                    <button
-                      key={link.name}
-                      onClick={() => {
-                        alert('Resources section coming soon!');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-4 py-3 rounded-lg transition-all duration-200 font-medium text-gray-400 hover:text-gray-500 hover:bg-gray-50 cursor-not-allowed w-full text-left"
-                      title="Coming Soon"
-                    >
-                      {link.name}
-                    </button>
-                  );
-                }
-
                 return (
                   <Link
                     key={link.name}

@@ -20,7 +20,7 @@ class SubscriptionService {
     async getStatus(): Promise<SubscriptionStatus> {
         try {
             console.log('🔍 Getting subscription status...');
-            const response = await apiService.get<{ data: SubscriptionStatus }>('/subscriptions/status');
+            const response = await apiService.get<SubscriptionStatus>('/subscriptions/status');
             console.log('📡 Raw API response:', response);
             console.log('📡 Response data:', response.data);
 
@@ -30,11 +30,11 @@ class SubscriptionService {
 
             // Ensure preferences exist with defaults
             const result = {
-                isSubscribed: subscriptionData.isSubscribed || false,
+                isSubscribed: subscriptionData?.isSubscribed || false,
                 preferences: {
-                    eventUpdates: subscriptionData.preferences?.eventUpdates ?? true,
-                    newsletter: subscriptionData.preferences?.newsletter ?? true,
-                    promotional: subscriptionData.preferences?.promotional ?? false
+                    eventUpdates: subscriptionData?.preferences?.eventUpdates ?? true,
+                    newsletter: subscriptionData?.preferences?.newsletter ?? true,
+                    promotional: subscriptionData?.preferences?.promotional ?? false
                 }
             };
 
@@ -50,11 +50,18 @@ class SubscriptionService {
     async subscribe(): Promise<{ success: boolean; message: string; isSubscribed: boolean }> {
         try {
             console.log('🔍 Calling authenticated subscribe endpoint...');
+            console.log('🔍 API Base URL:', this.getApiBaseUrl());
+            console.log('🔍 Full URL:', `${this.getApiBaseUrl()}/subscriptions/subscribe`);
+
             const response = await apiService.post<{ success: boolean; message: string; isSubscribed: boolean }>('/subscriptions/subscribe');
             console.log('📡 Authenticated subscribe response:', response);
-            return response.data!;
+            return response.data || response;
         } catch (error) {
             console.error('❌ Authenticated subscribe error:', error);
+            console.error('❌ Error details:', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
             return {
                 success: false,
                 message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -64,8 +71,25 @@ class SubscriptionService {
 
     // Unsubscribe from email updates
     async unsubscribe(): Promise<{ success: boolean; message: string; isSubscribed: boolean }> {
-        const response = await apiService.post<{ success: boolean; message: string; isSubscribed: boolean }>('/subscriptions/unsubscribe');
-        return response.data!;
+        try {
+            console.log('🔍 Calling unsubscribe endpoint...');
+            console.log('🔍 API Base URL:', this.getApiBaseUrl());
+            console.log('🔍 Full URL:', `${this.getApiBaseUrl()}/subscriptions/unsubscribe`);
+
+            const response = await apiService.post<{ success: boolean; message: string; isSubscribed: boolean }>('/subscriptions/unsubscribe');
+            console.log('📡 Unsubscribe response:', response);
+            return response.data || response;
+        } catch (error) {
+            console.error('❌ Unsubscribe error:', error);
+            console.error('❌ Error details:', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
+            return {
+                success: false,
+                message: `Unsubscribe error: ${error instanceof Error ? error.message : 'Unknown error'}`
+            };
+        }
     }
 
     // Update subscription preferences
@@ -79,7 +103,7 @@ class SubscriptionService {
             message: string;
             data: SubscriptionStatus;
         }>('/subscriptions/preferences', preferences);
-        return response.data!;
+        return response.data || response;
     }
 
     // Helper method to get the correct API base URL

@@ -212,17 +212,29 @@ const Settings = () => {
 
     // Subscription management functions
     const handleSubscriptionToggle = async () => {
-        if (!subscriptionStatus) return;
+        console.log('🔍 Subscription toggle clicked');
+        console.log('🔍 Current subscription status:', subscriptionStatus);
+        console.log('🔍 Is authenticated:', isAuthenticated);
+        console.log('🔍 User:', user);
+
+        if (!subscriptionStatus) {
+            console.log('❌ No subscription status available');
+            return;
+        }
 
         try {
             setSubscriptionLoading(true);
             let result;
 
             if (subscriptionStatus.isSubscribed) {
+                console.log('🔍 Calling unsubscribe...');
                 result = await subscriptionService.unsubscribe();
             } else {
+                console.log('🔍 Calling subscribe...');
                 result = await subscriptionService.subscribe();
             }
+
+            console.log('📡 Subscription result:', result);
 
             if (result.success) {
                 toast.success(result.message);
@@ -231,7 +243,11 @@ const Settings = () => {
                 toast.error(result.message);
             }
         } catch (error) {
-            console.error('Subscription toggle error:', error);
+            console.error('❌ Subscription toggle error:', error);
+            console.error('❌ Error details:', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined
+            });
             toast.error("Failed to update subscription status");
         } finally {
             setSubscriptionLoading(false);

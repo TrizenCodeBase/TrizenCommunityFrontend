@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import ScrollToTop from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Events from "./pages/Events";
 import EventRegistration from "./pages/EventRegistration";
@@ -31,41 +29,33 @@ const queryClient = new QueryClient({
 });
 
 const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true
-            }}
-          >
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/events/:eventId" element={<EventDetails />} />
-              <Route path="/events/:eventId/register" element={<EventRegistration />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Dashboard />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/start-discussion" element={<StartDiscussion />} />
-              <Route path="/verify-otp" element={<OTPVerification />} />
-              <Route path="/unsubscribe/:token" element={<Unsubscribe />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <AuthProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/events/:eventId" element={<EventDetails />} />
+            <Route path="/events/:eventId/register" element={<EventRegistration />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/start-discussion" element={<StartDiscussion />} />
+            <Route path="/verify-otp" element={<OTPVerification />} />
+            <Route path="/unsubscribe/:token" element={<Unsubscribe />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
 
 export default App;

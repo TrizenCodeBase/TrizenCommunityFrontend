@@ -58,6 +58,8 @@ interface RegisterData {
 class ApiService {
     private getAuthHeaders(): HeadersInit {
         const token = localStorage.getItem('authToken');
+        console.log('🔍 Auth token exists:', !!token);
+        console.log('🔍 Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
         return {
             'Content-Type': 'application/json',
             ...(token && { Authorization: `Bearer ${token}` }),

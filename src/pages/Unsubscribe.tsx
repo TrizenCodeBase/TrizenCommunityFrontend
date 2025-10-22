@@ -23,6 +23,7 @@ const Unsubscribe = () => {
     useEffect(() => {
         const handleUnsubscribe = async () => {
             if (!token) {
+                console.log('❌ No token provided');
                 setResult({
                     success: false,
                     message: 'Invalid unsubscribe link'
@@ -31,15 +32,22 @@ const Unsubscribe = () => {
                 return;
             }
 
+            console.log('🔍 Processing unsubscribe for token:', token);
+            console.log('🔗 API URL:', `http://localhost:5000/api/subscriptions/unsubscribe/${token}`);
+
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/subscriptions/unsubscribe/${token}`, {
+                const response = await fetch(`http://localhost:5000/api/subscriptions/unsubscribe/${token}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                 });
 
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response ok:', response.ok);
+
                 const data = await response.json();
+                console.log('📡 Response data:', data);
 
                 if (data.success) {
                     setResult({
