@@ -33,10 +33,10 @@ const Unsubscribe = () => {
             }
 
             console.log('🔍 Processing unsubscribe for token:', token);
-            console.log('🔗 API URL:', `http://localhost:5000/api/subscriptions/unsubscribe/${token}`);
+            console.log('🔗 API URL:', `https://trizencommunitybackend.llp.trizenventures.com/api/subscriptions/unsubscribe/${token}`);
 
             try {
-                const response = await fetch(`http://localhost:5000/api/subscriptions/unsubscribe/${token}`, {
+                const response = await fetch(`https://trizencommunitybackend.llp.trizenventures.com/api/subscriptions/unsubscribe/${token}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

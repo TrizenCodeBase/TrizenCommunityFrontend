@@ -109,7 +109,7 @@ class SubscriptionService {
     // Helper method to get the correct API base URL
     private getApiBaseUrl(): string {
         // Force localhost for development
-        const url = 'http://localhost:5000/api';
+        const url = 'https://trizencommunitybackend.llp.trizenventures.com/api';
         console.log('🔗 API Base URL:', url);
         console.log('🔍 Environment mode:', import.meta.env.MODE);
         console.log('🔍 VITE_API_URL:', import.meta.env.VITE_API_URL);
@@ -181,7 +181,7 @@ class SubscriptionService {
         email?: string;
     }> {
         try {
-            const url = 'http://localhost:5000/api/subscriptions/guest';
+            const url = 'https://trizencommunitybackend.llp.trizenventures.com/api/subscriptions/guest';
             console.log('🔗 Guest subscription URL:', url);
             console.log('📧 Email being sent:', email);
 

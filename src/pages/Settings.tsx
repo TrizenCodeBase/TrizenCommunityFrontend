@@ -66,7 +66,7 @@ const Settings = () => {
             setSubscriptionLoading(true);
 
             // Test if we can reach the API first
-            const testResponse = await fetch('http://localhost:5000/api/subscriptions/guest', {
+            const testResponse = await fetch('https://trizencommunitybackend.llp.trizenventures.com/api/subscriptions/guest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: 'test@example.com' })
