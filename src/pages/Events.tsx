@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2, MoreVertical, Edit, Trash2, Grid, List } from "lucide-react";
+import { Calendar, MapPin, Clock, Plus, Search, Filter, ArrowLeft, Eye, Share2, MoreVertical, Edit, Trash2, Grid, List, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -324,73 +324,92 @@ const Events = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50">
+        <div className="min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50 relative overflow-hidden">
             <Navbar />
 
-            {/* Back to Home Link */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+            {/* Enhanced Background with Professional Animations */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {/* Animated gradient orbs */}
+                <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-blue-400/15 to-blue-600/8 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-tr from-orange-400/15 to-orange-600/8 rounded-full blur-3xl animate-pulse"></div>
+
+                {/* Secondary floating elements */}
+                <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-gradient-to-br from-blue-300/10 to-blue-500/5 rounded-full blur-2xl animate-pulse"></div>
+                <div className="absolute bottom-1/3 right-1/3 w-56 h-56 bg-gradient-to-tl from-orange-300/10 to-orange-500/5 rounded-full blur-2xl animate-pulse"></div>
+            </div>
+
+            {/* Enhanced Back to Home Link with Animation */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 relative z-10">
                 <button
                     onClick={() => window.history.back()}
-                    className="flex items-center text-primary hover:text-primary-dark transition-colors mb-8"
+                    className="group flex items-center text-blue-600 hover:text-blue-700 transition-all duration-300 mb-8 hover:scale-105"
                 >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Home
+                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+                    <span className="font-medium">Back to Home</span>
                 </button>
             </div>
 
-            {/* Header Section */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            {/* Enhanced Header Section with Professional Animations */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-10">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                        Upcoming <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">Events</span>
+                        Upcoming <span className="bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent animate-gradient">Events</span>
                     </h1>
                     <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
                         Discover workshops, conferences, meetups, and training sessions designed to accelerate your learning and career growth.
                     </p>
                 </div>
 
-                {/* Search and Filter Section */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-6 mb-8">
+                {/* Enhanced Search and Filter Section with Professional Animations */}
+                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8 transition-all duration-500 hover:shadow-2xl">
                     <div className="flex flex-col lg:flex-row gap-4 mb-6">
-                        {/* Search Bar */}
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {/* Enhanced Search Bar with Professional Animations */}
+                        <div className="flex-1 relative group">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300" />
                             <Input
-                                placeholder="Search events..."
+                                placeholder="Search events, speakers, or topics..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 h-12 text-lg border-gray-300 focus:border-primary"
+                                className="pl-10 h-12 text-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 hover:border-gray-400"
                             />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-300"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
 
-                        {/* Category Filter */}
+                        {/* Enhanced Category Filter */}
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                            <SelectTrigger className="w-full lg:w-48 h-12 border-gray-300 focus:border-primary">
+                            <SelectTrigger className="w-full lg:w-48 h-12 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 hover:border-gray-400">
                                 <SelectValue placeholder="All Categories" />
                             </SelectTrigger>
                             <SelectContent>
                                 {categories.map((category) => (
-                                    <SelectItem key={category} value={category}>
+                                    <SelectItem key={category} value={category} className="hover:bg-blue-50 transition-colors duration-200">
                                         {category}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
 
-                        {/* Date Filter */}
+                        {/* Enhanced Date Filter */}
                         <Select value={selectedDate} onValueChange={setSelectedDate}>
-                            <SelectTrigger className="w-full lg:w-48 h-12 border-gray-300 focus:border-primary">
+                            <SelectTrigger className="w-full lg:w-48 h-12 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 hover:border-gray-400">
                                 <SelectValue placeholder="All Dates" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="All Dates">All Dates</SelectItem>
-                                <SelectItem value="This Week">This Week</SelectItem>
-                                <SelectItem value="This Month">This Month</SelectItem>
-                                <SelectItem value="Next Month">Next Month</SelectItem>
+                                <SelectItem value="All Dates" className="hover:bg-blue-50 transition-colors duration-200">All Dates</SelectItem>
+                                <SelectItem value="This Week" className="hover:bg-blue-50 transition-colors duration-200">This Week</SelectItem>
+                                <SelectItem value="This Month" className="hover:bg-blue-50 transition-colors duration-200">This Month</SelectItem>
+                                <SelectItem value="Next Month" className="hover:bg-blue-50 transition-colors duration-200">Next Month</SelectItem>
                             </SelectContent>
                         </Select>
 
-                        {/* Create Event Button - Admin Only */}
+                        {/* Enhanced Create Event Button - Admin Only */}
                         {isAdmin && (
                             <Button
                                 onClick={() => {
@@ -400,7 +419,7 @@ const Events = () => {
                                     }
                                     setShowCreateModal(true);
                                 }}
-                                className="h-12 px-6 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white shadow-lg shadow-primary/25"
+                                className="h-12 px-6 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:scale-105 hover:shadow-xl"
                             >
                                 <Plus className="w-5 h-5 mr-2" />
                                 Create Event
@@ -410,34 +429,38 @@ const Events = () => {
 
                     {/* Quick Filters and View Options */}
                     <div className="flex flex-wrap justify-between items-center gap-4">
-                        {/* Quick Filters */}
+                        {/* Enhanced Quick Filters with Professional Animations */}
                         <div className="flex flex-wrap gap-3">
                             <span className="text-sm font-medium text-gray-600 mr-2">Quick filters:</span>
-                            {quickFilters.map((filter) => (
+                            {quickFilters.map((filter, index) => (
                                 <Button
                                     key={filter}
                                     variant={selectedCategory === filter ? "default" : "outline"}
                                     size="sm"
                                     onClick={() => setSelectedCategory(filter)}
-                                    className={`${selectedCategory === filter
-                                        ? "bg-primary text-white"
-                                        : "border-gray-300 text-gray-600 hover:border-primary hover:text-primary"
+                                    className={`transition-all duration-300 hover:scale-105 ${selectedCategory === filter
+                                        ? "bg-gradient-to-r from-blue-600 to-orange-500 text-white shadow-lg"
+                                        : "border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50"
                                         }`}
+                                    style={{ animationDelay: `${index * 100}ms` }}
                                 >
                                     {filter}
                                 </Button>
                             ))}
                         </div>
 
-                        {/* View Toggle */}
+                        {/* Enhanced View Toggle with Professional Animations */}
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-gray-600">View:</span>
-                            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                            <div className="flex border border-gray-300 rounded-lg overflow-hidden shadow-sm">
                                 <Button
                                     variant={viewMode === 'grid' ? 'default' : 'ghost'}
                                     size="sm"
                                     onClick={() => setViewMode('grid')}
-                                    className="rounded-none border-0"
+                                    className={`rounded-none border-0 transition-all duration-300 ${viewMode === 'grid'
+                                        ? 'bg-gradient-to-r from-blue-600 to-orange-500 text-white shadow-lg'
+                                        : 'hover:bg-gray-50'
+                                        }`}
                                 >
                                     <Grid className="w-4 h-4" />
                                 </Button>
@@ -445,7 +468,10 @@ const Events = () => {
                                     variant={viewMode === 'list' ? 'default' : 'ghost'}
                                     size="sm"
                                     onClick={() => setViewMode('list')}
-                                    className="rounded-none border-0"
+                                    className={`rounded-none border-0 transition-all duration-300 ${viewMode === 'list'
+                                        ? 'bg-gradient-to-r from-blue-600 to-orange-500 text-white shadow-lg'
+                                        : 'hover:bg-gray-50'
+                                        }`}
                                 >
                                     <List className="w-4 h-4" />
                                 </Button>
@@ -454,33 +480,38 @@ const Events = () => {
                     </div>
                 </div>
 
-                {/* Events Display - Grid and List Views */}
+                {/* Enhanced Events Display with Professional Animations */}
                 {viewMode === 'grid' ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                        {filteredEvents.map((event) => (
-                            <Card key={event._id} className="group overflow-hidden rounded-2xl border-2 border-gray-200/50 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-                                {/* Event Image */}
+                        {filteredEvents.map((event, index) => (
+                            <Card
+                                key={event._id}
+                                className="group overflow-hidden rounded-2xl border border-gray-200/50 hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 bg-white/95 backdrop-blur-sm"
+                            >
+                                {/* Enhanced Event Image with Professional Animations */}
                                 <div className="relative h-48 overflow-hidden">
                                     <img
                                         src={event.coverImage || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"}
                                         alt={event.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         onError={(e) => {
-                                            // Fallback to gradient with icon if image fails
                                             e.currentTarget.style.display = 'none';
                                             const parent = e.currentTarget.parentElement;
                                             if (parent) {
-                                                parent.classList.add('bg-gradient-to-br', 'from-primary/10', 'to-accent/10');
+                                                parent.classList.add('bg-gradient-to-br', 'from-blue-500/10', 'to-orange-500/10');
                                                 const fallbackIcon = document.createElement('div');
                                                 fallbackIcon.className = 'absolute inset-0 flex items-center justify-center';
-                                                fallbackIcon.innerHTML = '<svg class="w-16 h-16 text-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                                fallbackIcon.innerHTML = '<svg class="w-16 h-16 text-blue-500/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
                                                 parent.appendChild(fallbackIcon);
                                             }
                                         }}
                                     />
-                                    {/* Category Badge Overlay */}
+
+                                    {/* Enhanced Gradient Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                    {/* Enhanced Category Badge */}
                                     <div className="absolute top-3 left-3">
-                                        <Badge className="bg-white/90 backdrop-blur-sm text-primary border-0 shadow-md">
+                                        <Badge className="bg-white/95 backdrop-blur-md text-blue-600 border-0 shadow-lg font-semibold px-3 py-1">
                                             {event.category}
                                         </Badge>
                                     </div>
@@ -517,30 +548,34 @@ const Events = () => {
                                     )}
                                 </div>
 
-                                <CardContent className="p-6">
-                                    {/* Event Title */}
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                                <CardContent className="p-6 bg-white/50 backdrop-blur-sm">
+                                    {/* Enhanced Event Title */}
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300 line-clamp-2">
                                         {event.title}
                                     </h3>
 
-                                    {/* Event Details */}
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex items-center text-gray-600">
-                                            <Calendar className="w-4 h-4 mr-3 text-primary" />
-                                            <span className="text-sm">{formatEventDate(event.startDate)} • {formatEventTime(event.startDate, event.endDate)}</span>
+                                    {/* Enhanced Event Details */}
+                                    <div className="space-y-3 mb-4">
+                                        <div className="flex items-center text-gray-600 group-hover:text-gray-800 transition-colors">
+                                            <Calendar className="w-4 h-4 mr-3 text-blue-500 flex-shrink-0" />
+                                            <span className="text-sm font-medium">{formatEventDate(event.startDate)} • {formatEventTime(event.startDate, event.endDate)}</span>
                                         </div>
-                                        <div className="flex items-center text-gray-600">
-                                            <MapPin className="w-4 h-4 mr-3 text-primary" />
-                                            <span className="text-sm">{getEventLocation(event)}</span>
+                                        <div className="flex items-center text-gray-600 group-hover:text-gray-800 transition-colors">
+                                            <MapPin className="w-4 h-4 mr-3 text-orange-500 flex-shrink-0" />
+                                            <span className="text-sm font-medium">{getEventLocation(event)}</span>
+                                        </div>
+                                        <div className="flex items-center text-gray-600 group-hover:text-gray-800 transition-colors">
+                                            <Users className="w-4 h-4 mr-3 text-green-500 flex-shrink-0" />
+                                            <span className="text-sm font-medium">{event.currentAttendees}/{event.maxAttendees} attendees</span>
                                         </div>
                                     </div>
 
-                                    {/* Description */}
-                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                    {/* Enhanced Description */}
+                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 group-hover:text-gray-800 transition-colors">
                                         {event.description}
                                     </p>
 
-                                    {/* Action Buttons */}
+                                    {/* Enhanced Action Buttons */}
                                     <div className="flex space-x-2">
                                         <Button
                                             onClick={() => {
@@ -550,19 +585,16 @@ const Events = () => {
                                                 }
                                                 navigate(`/events/${event._id}/register`);
                                             }}
-                                            className="flex-1 bg-gradient-to-r from-primary to-primary-light hover:from-primary-dark hover:to-primary text-white"
+                                            className="flex-1 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-700 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                                         >
-                                            Register
+                                            Register Now
                                         </Button>
                                         <Button
                                             variant="outline"
                                             onClick={() => handleViewEvent(event)}
-                                            className="border-gray-300 hover:border-primary hover:text-primary"
+                                            className="border-blue-300 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 hover:scale-105"
                                         >
                                             View Details
-                                        </Button>
-                                        <Button variant="outline" size="icon" className="border-gray-300 hover:border-primary hover:text-primary">
-                                            <Share2 className="w-4 h-4" />
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -662,9 +694,13 @@ const Events = () => {
                     </div>
                 )}
 
-                {/* Load More Button */}
+                {/* Enhanced Load More Button with Professional Animations */}
                 <div className="text-center">
-                    <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/5 hover:border-primary/50 px-8 py-3">
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-600 px-8 py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                    >
                         Load More Events
                     </Button>
                 </div>

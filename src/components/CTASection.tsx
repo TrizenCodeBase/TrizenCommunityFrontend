@@ -1,7 +1,8 @@
-import { ArrowRight, Mail, Users, Sparkles, Globe, Star, User, Facebook, Linkedin, Instagram, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowRight, Mail, Users, Sparkles, Globe, Star, User, Facebook, Linkedin, Instagram, CheckCircle, AlertCircle, TrendingUp, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -33,7 +34,36 @@ const CTASection = () => {
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
   const { isAuthenticated, user } = useAuth();
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const newsletterRef = useRef<HTMLDivElement>(null);
+  const socialRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleElements(prev => new Set([...prev, entry.target.id]));
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const elements = [sectionRef.current, headerRef.current, newsletterRef.current, socialRef.current];
+    elements.forEach((element) => {
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const socialLinks = [
     { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/trizenventures/" },

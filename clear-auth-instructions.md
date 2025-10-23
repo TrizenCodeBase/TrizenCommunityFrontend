@@ -42,3 +42,4 @@ window.location.reload();
 Once you log in again, the Dashboard should show your registered events correctly!
 
 
+

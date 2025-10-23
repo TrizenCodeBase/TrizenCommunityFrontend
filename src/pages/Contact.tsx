@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Phone, MapPin, Send, User, Building, MessageSquare, CheckCircle, Clock, Globe, Linkedin, Facebook, Instagram } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, Send, User, Building, MessageSquare, CheckCircle, Clock, Globe, Linkedin, Twitter, Github, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,28 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-// Custom X (Twitter) icon component
-const XIcon = ({ className }: { className?: string }) => (
-    <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className={className}
-    >
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-);
-
-// Custom WhatsApp icon component
-const WhatsAppIcon = ({ className }: { className?: string }) => (
-    <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className={className}
-    >
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-    </svg>
-);
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -60,63 +38,11 @@ const Contact = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Client-side validation
-        if (!formData.name.trim()) {
-            alert('Please enter your name');
-            setIsSubmitting(false);
-            return;
-        }
-        if (!formData.email.trim()) {
-            alert('Please enter your email address');
-            setIsSubmitting(false);
-            return;
-        }
-        if (!formData.inquiryType) {
-            alert('Please select an inquiry type');
-            setIsSubmitting(false);
-            return;
-        }
-        if (!formData.subject.trim()) {
-            alert('Please enter a subject');
-            setIsSubmitting(false);
-            return;
-        }
-        if (!formData.message.trim()) {
-            alert('Please enter your message');
-            setIsSubmitting(false);
-            return;
-        }
+        // Simulate form submission
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        try {
-            const response = await fetch('https://trizencommunitybackend.llp.trizenventures.com/api/contact', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                setIsSubmitted(true);
-                console.log('✅ Contact form submitted successfully:', result);
-            } else {
-                console.error('❌ Contact form submission failed:', result.message);
-                if (result.errors && result.errors.length > 0) {
-                    // Show specific validation errors
-                    const errorMessages = result.errors.map((error: any) => error.msg).join(', ');
-                    alert(`Validation failed: ${errorMessages}`);
-                } else {
-                    alert('Failed to send message. Please try again later.');
-                }
-            }
-        } catch (error) {
-            console.error('❌ Network error:', error);
-            alert('Network error. Please check your connection and try again.');
-        } finally {
-            setIsSubmitting(false);
-        }
+        setIsSubmitting(false);
+        setIsSubmitted(true);
 
         // Reset form after 3 seconds
         setTimeout(() => {
@@ -136,16 +62,16 @@ const Contact = () => {
         {
             icon: Mail,
             title: "Email",
-            value: "support@trizenventures.com",
-            link: "mailto:support@trizenventures.com",
+            value: "hello@trizen.com",
+            link: "mailto:hello@trizen.com",
             availability: "Response within 24 hours"
         },
         {
             icon: Phone,
             title: "Phone",
-            value: "+918639648822",
-            link: "tel:+918639648822",
-            availability: "Mon-Fri, 9 AM - 6 PM IST"
+            value: "+1 (555) 123-4567",
+            link: "tel:+15551234567",
+            availability: "Mon-Fri, 9 AM - 6 PM PST"
         },
         {
             icon: MapPin,
@@ -157,11 +83,10 @@ const Contact = () => {
     ];
 
     const socialLinks = [
-        { name: "Facebook", icon: Facebook, link: "https://www.facebook.com/trizenventures/", color: "hover:bg-blue-700" },
-        { name: "X", icon: XIcon, link: "https://x.com/TrizenVenture", color: "hover:bg-sky-500" },
-        { name: "LinkedIn", icon: Linkedin, link: "https://www.linkedin.com/company/trizenventuresllp/", color: "hover:bg-blue-600" },
-        { name: "Instagram", icon: Instagram, link: "https://www.instagram.com/trizenventures/", color: "hover:bg-pink-600" },
-        { name: "WhatsApp", icon: WhatsAppIcon, link: "https://whatsapp.com/channel/0029Vb6cKIp4SpkNdvBufo0g", color: "hover:bg-green-600" }
+        { name: "LinkedIn", icon: Linkedin, link: "#", color: "hover:bg-blue-600" },
+        { name: "Twitter", icon: Twitter, link: "#", color: "hover:bg-sky-500" },
+        { name: "GitHub", icon: Github, link: "#", color: "hover:bg-gray-800" },
+        { name: "Facebook", icon: Facebook, link: "#", color: "hover:bg-blue-700" }
     ];
 
     return (
@@ -403,7 +328,7 @@ const Contact = () => {
                                 <CardTitle className="text-lg font-bold text-gray-900">Follow Us</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-5 gap-2">
+                                <div className="grid grid-cols-4 gap-2">
                                     {socialLinks.map((social, index) => (
                                         <a
                                             key={index}
