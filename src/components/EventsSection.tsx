@@ -290,19 +290,13 @@ const EventsSection = () => {
                   {/* Clean Category Badge */}
                   <div className="absolute top-4 left-4">
                     <Badge className={`px-3 py-1 rounded-full text-xs font-semibold text-white shadow-lg ${event.category === 'Workshop' ? 'bg-blue-600' :
-                        event.category === 'Conference' ? 'bg-orange-500' :
-                          'bg-gray-600'
+                      event.category === 'Conference' ? 'bg-orange-500' :
+                        'bg-gray-600'
                       }`}>
                       {event.category}
                     </Badge>
                   </div>
 
-                  {/* Price Badge */}
-                  <div className="absolute top-4 right-4">
-                    <Badge className="px-3 py-1 rounded-full text-xs font-semibold text-white bg-green-600 shadow-lg">
-                      {event.price === 0 ? 'Free' : `$${event.price}`}
-                    </Badge>
-                  </div>
                 </div>
 
                 {/* Clean Content */}
